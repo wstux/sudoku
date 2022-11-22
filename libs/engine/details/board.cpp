@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "engine/board.h"
+#include "engine/details/utils.h"
 
 namespace engine {
 namespace {
@@ -23,9 +24,6 @@ inline void set_if(TType& var, const TType& val, TUnaryFn f)
         var = val;
     }
 }
-
-inline size_t grid_start_col(const size_t c) { return c - (c % GRID_SIZE); }
-inline size_t grid_start_row(const size_t r) { return r - (r % GRID_SIZE); }
 
 void reset_possibility(std::array<std::array<std::array<int, LINE_SIZE>, COL_SIZE>, ROW_SIZE>& pos, cell_t v, const int step)
 {
@@ -191,8 +189,8 @@ void board::set_possible(const size_t r, const size_t c, cell_t v, const int s)
                    set_if(pos_cell[v], s, [](int var) -> bool { return var == -1; });
                });
     // Set grid.
-    const size_t start_col = grid_start_col(c);
-    const size_t start_row = grid_start_row(r);
+    const size_t start_col = details::grid_start_col(c);
+    const size_t start_row = details::grid_start_row(r);
     for (size_t row = start_row; row < start_row + GRID_SIZE; ++row) {
         possibility_row_t& pos_row = m_possible[row];
         for (size_t col = start_col; col < start_col + GRID_SIZE; ++col) {
