@@ -9,7 +9,7 @@
 
 namespace {
 
-const engine::board_t td_1 = {
+const engine::board::grid_t td_1 = {
         {{3, 0, 6, 5, 0, 8, 4, 0, 0},
          {5, 2, 0, 0, 0, 0, 0, 0, 0},
          {0, 8, 7, 0, 0, 0, 0, 3, 1},
@@ -20,7 +20,7 @@ const engine::board_t td_1 = {
          {0, 0, 0, 0, 0, 0, 0, 7, 4},
          {0, 0, 5, 2, 0, 6, 3, 0, 0}}
     };
-const engine::board_t td_2 = {
+const engine::board::grid_t td_2 = {
         {{0, 0, 0, 2, 0, 0, 0, 5, 0},
          {5, 0, 0, 0, 9, 4, 0, 1, 0},
          {0, 0, 8, 3, 0, 0, 0, 0, 7},
@@ -32,7 +32,7 @@ const engine::board_t td_2 = {
          {0, 2, 0, 0, 0, 8, 0, 0, 0}}
     };
 
-std::string print(const engine::board_t& board)
+std::string print(const engine::board::grid_t& board)
 {
     std::stringstream ss;
     for (size_t i = 0; i < board.size(); ++i) {
@@ -48,7 +48,7 @@ std::string print(const engine::board_t& board)
 
 TEST(sudoku_utils, solve_single_cell)
 {
-    const engine::board_t etalon = {
+    const engine::board::grid_t etalon = {
         {{3, 0, 6, 5, 0, 8, 4, 0, 0}, 
          {5, 2, 0, 0, 0, 0, 0, 0, 0}, 
          {4, 8, 7, 0, 2, 9, 5, 3, 1}, 
@@ -70,7 +70,7 @@ TEST(sudoku_utils, solve_single_cell)
 
 TEST(sudoku_utils, solve_single_value_col_case_1)
 {
-    const engine::board_t etalon = {
+    const engine::board::grid_t etalon = {
         {{3, 0, 6, 5, 0, 8, 4, 0, 0},
          {5, 2, 0, 0, 0, 0, 0, 6, 0},
          {0, 8, 7, 0, 0, 0, 5, 3, 1},
@@ -92,7 +92,7 @@ TEST(sudoku_utils, solve_single_value_col_case_1)
 
 TEST(sudoku_utils, solve_single_value_col_case_2)
 {
-    const engine::board_t etalon = {
+    const engine::board::grid_t etalon = {
         {{0, 0, 1, 2, 0, 0, 0, 5, 0},
          {5, 0, 0, 0, 9, 4, 0, 1, 0},
          {0, 0, 8, 3, 0, 0, 0, 0, 7},
@@ -116,7 +116,7 @@ TEST(sudoku_utils, solve_single_value_col_case_2)
 
 TEST(sudoku_utils, solve_single_value_row_case_1)
 {
-    const engine::board_t etalon = {
+    const engine::board::grid_t etalon = {
         {{3, 1, 6, 5, 0, 8, 4, 0, 0},
          {5, 2, 0, 0, 0, 0, 0, 0, 0},
          {0, 8, 7, 6, 0, 9, 5, 3, 1},
@@ -138,7 +138,7 @@ TEST(sudoku_utils, solve_single_value_row_case_1)
 
 TEST(sudoku_utils, solve_single_value_row_case_2)
 {
-    const engine::board_t etalon = {
+    const engine::board::grid_t etalon = {
         {{0, 0, 0, 2, 0, 0, 0, 5, 0},
          {5, 0, 0, 0, 9, 4, 0, 1, 0},
          {0, 0, 8, 3, 0, 0, 0, 0, 7},
@@ -160,7 +160,7 @@ TEST(sudoku_utils, solve_single_value_row_case_2)
 
 TEST(sudoku_utils, solve_single_value_section)
 {
-    const engine::board_t etalon = {
+    const engine::board::grid_t etalon = {
         {{3, 0, 6, 5, 0, 8, 4, 0, 0},
          {5, 2, 0, 0, 0, 0, 0, 0, 0},
          {4, 8, 7, 0, 0, 0, 0, 3, 1},
@@ -182,7 +182,7 @@ TEST(sudoku_utils, solve_single_value_section)
 
 TEST(sudoku_utils, solve_single_value)
 {
-    const engine::board_t etalon_step_1 = {
+    const engine::board::grid_t etalon_step_1 = {
         {{0, 0, 1, 2, 0, 6, 0, 5, 0},
          {5, 0, 0, 0, 9, 4, 0, 1, 0},
          {0, 0, 8, 3, 0, 0, 0, 0, 7},
@@ -193,7 +193,7 @@ TEST(sudoku_utils, solve_single_value)
          {0, 5, 0, 4, 2, 0, 0, 0, 8},
          {0, 2, 0, 0, 0, 8, 0, 0, 0}}
     };
-    const engine::board_t etalon_step_2 = {
+    const engine::board::grid_t etalon_step_2 = {
         {{7, 0, 1, 2, 8, 6, 0, 5, 0},
          {5, 6, 2, 7, 9, 4, 8, 1, 3},
          {0, 0, 8, 3, 0, 0, 2, 6, 7},
@@ -204,7 +204,7 @@ TEST(sudoku_utils, solve_single_value)
          {0, 5, 0, 4, 2, 0, 0, 0, 8},
          {0, 2, 0, 0, 0, 8, 0, 0, 0}}
     };
-    const engine::board_t etalon_step_3 = {
+    const engine::board::grid_t etalon_step_3 = {
         {{7, 3, 1, 2, 8, 6, 4, 5, 9},
          {5, 6, 2, 7, 9, 4, 8, 1, 3},
          {0, 0, 8, 3, 0, 0, 2, 6, 7},
@@ -215,7 +215,7 @@ TEST(sudoku_utils, solve_single_value)
          {0, 5, 0, 4, 2, 0, 0, 0, 8},
          {0, 2, 0, 0, 0, 8, 0, 0, 0}}
     };
-    const engine::board_t etalon_step_4 = {
+    const engine::board::grid_t etalon_step_4 = {
         {{7, 3, 1, 2, 8, 6, 4, 5, 9},
          {5, 6, 2, 7, 9, 4, 8, 1, 3},
          {4, 9, 8, 3, 0, 0, 2, 6, 7},

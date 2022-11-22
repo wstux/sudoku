@@ -8,6 +8,10 @@
 namespace engine {
 namespace {
 
+using poss_cell_t = std::array<board::step_t, board::GRID_SIZE * board::GRID_SIZE>;
+using poss_row_t  = std::array<poss_cell_t, board::COL_SIZE>;
+using poss_grid_t = std::array<poss_row_t, board::ROW_SIZE>;
+
 template<class TInputIterator, class TUnaryFn>
 inline void for_each_n(TInputIterator it, size_t n, TUnaryFn f)
 {
@@ -24,12 +28,11 @@ inline void set_if(TType& var, const TType& val, TUnaryFn f)
     }
 }
 
-void reset_possibility(std::array<std::array<std::array<int, LINE_SIZE>, COL_SIZE>, ROW_SIZE>& pos, cell_t v, const int step)
+void reset_possibility(poss_grid_t& pos, board::cell_t v, const int step)
 {
-    v -= 1;
-    for (std::array<std::array<int, LINE_SIZE>, COL_SIZE>& pos_row : pos) {
-        for (std::array<int, LINE_SIZE>& pos_cell : pos_row) {
-            set_if(pos_cell[v], -1, [step](int var) -> bool { return var == step; });
+    for (poss_row_t& pos_row : pos) {
+        for (poss_cell_t& pos_cell : pos_row) {
+            set_if(pos_cell[v - 1], -1, [step](int var) -> bool { return var == step; });
         }
     }
 }
@@ -39,7 +42,7 @@ void reset_possibility(std::array<std::array<std::array<int, LINE_SIZE>, COL_SIZ
 board::board()
 {}
 
-board::board(board_t b)
+board::board(grid_t b)
     : m_base_board(std::move(b))
 {
     init();
@@ -103,7 +106,7 @@ bool board::is_possible(const size_t r, const size_t c, const cell_t v) const
     return (m_base_board[r][c] == 0) && (m_possible[r][c][v - 1] == -1);
 }
 
-void board::reset(board_t b)
+void board::reset(grid_t b)
 {
     m_base_board = std::move(b);
     init();
