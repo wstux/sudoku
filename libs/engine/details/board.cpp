@@ -8,6 +8,17 @@
 namespace engine {
 namespace {
 
+struct step_change_t final
+{
+    board::step_t step = -1;
+    board::cell_t val;
+    size_t row = board::ROW_SIZE;
+    size_t col = board::COL_SIZE;
+};
+
+using ch_row_t = std::array<board::step_t, board::COL_SIZE>;
+using ch_grid_t = std::array<ch_row_t, board::ROW_SIZE>;
+
 using poss_cell_t = std::array<board::step_t, board::GRID_SIZE * board::GRID_SIZE>;
 using poss_row_t  = std::array<poss_cell_t, board::COL_SIZE>;
 using poss_grid_t = std::array<poss_row_t, board::ROW_SIZE>;
@@ -28,13 +39,28 @@ inline void set_if(TType& var, const TType& val, TUnaryFn f)
     }
 }
 
-void reset_possibility(poss_grid_t& pos, board::cell_t v, const int step)
+step_change_t find_change(const ch_grid_t& ch_grid, const poss_grid_t& poss_grid, const board::step_t step)
 {
-    for (poss_row_t& pos_row : pos) {
-        for (poss_cell_t& pos_cell : pos_row) {
-            set_if(pos_cell[v - 1], -1, [step](int var) -> bool { return var == step; });
+    step_change_t ch;
+    for (size_t r = 0; r < ch_grid.size() && (ch.row == board::ROW_SIZE); ++r) {
+        for (size_t c = 0; c < ch_grid[r].size(); ++c) {
+            if (ch_grid[r][c] == step) {
+                ch.row = r;
+                ch.col = c;
+                break;
+            }
         }
     }
+    assert((ch.row != board::ROW_SIZE) && (ch.col != board::COL_SIZE));
+    for (board::cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
+        if (poss_grid[ch.row][ch.col][v - 1] == step) {
+            ch.val = v;
+            break;
+        }
+    }
+
+    ch.step = step;
+    return ch;
 }
 
 } // <anonymous> namespace
@@ -48,30 +74,6 @@ board::board(grid_t b)
     init();
 }
 
-board::step_change_t board::find_change(const step_t step) const
-{
-    step_change_t ch;
-    for (size_t r = 0; r < m_ch_board.size() && (ch.row == ROW_SIZE); ++r) {
-        for (size_t c = 0; c < m_ch_board[r].size(); ++c) {
-            if (m_ch_board[r][c] == step) {
-                ch.row = r;
-                ch.col = c;
-                break;
-            }
-        }
-    }
-    assert((ch.row != ROW_SIZE) && (ch.col != COL_SIZE));
-    for (cell_t v = BEGIN_VALUE; v < END_VALUE; ++v) {
-        if (m_possible[ch.row][ch.col][v - 1] == step) {
-            ch.val = v;
-            break;
-        }
-    }
-
-    ch.step = step;
-    return ch;
-}
-
 void board::init()
 {
     m_step = 0;
@@ -81,7 +83,7 @@ void board::init()
         const size_t r = details::row_by_position(p);
 
         m_possible[r][c].fill(-1);
-        m_ch_board[r][c] = -1;
+        m_ch_grid[r][c] = -1;
     }
     for (possibility_row_t& pos_row : m_possible) {
         for (possibility_cell_t& pos_cell : pos_row) {
@@ -100,7 +102,7 @@ void board::init()
 
 bool board::is_possible(const size_t r, const size_t c, const cell_t v) const
 {
-    return (m_ch_board[r][c] != 0) && (m_possible[r][c][v - 1] == -1);
+    return (m_ch_grid[r][c] != 0) && (m_possible[r][c][v - 1] == -1);
 }
 
 void board::reset(grid_t b)
@@ -109,18 +111,28 @@ void board::reset(grid_t b)
     init();
 }
 
+void board::reset_possible(const size_t r, const size_t c, cell_t v, const int s)
+{
+    m_ch_grid[r][c] = -1;
+
+    for (poss_row_t& pos_row : m_possible) {
+        for (poss_cell_t& pos_cell : pos_row) {
+            set_if(pos_cell[v - 1], -1, [s](int var) -> bool { return var == s; });
+        }
+    }
+}
+
 void board::rollback(const int step)
 {
     if ((m_step < step) || (step < 0)) {
         return;
     }
     while (m_step != step) {
-        const step_change_t f_ch = find_change(m_step);
+        const step_change_t f_ch = find_change(m_ch_grid, m_possible, m_step);
         assert(f_ch.step != -1);
         assert(f_ch.step == m_step);
 
-        reset_possibility(m_possible, f_ch.val, m_step);
-        m_ch_board[f_ch.row][f_ch.col] = -1;
+        reset_possible(f_ch.row, f_ch.col, f_ch.val, m_step);
         m_grid[f_ch.row][f_ch.col] = 0;
         --m_step;
     }
@@ -129,7 +141,7 @@ void board::rollback(const int step)
 void board::set_possible(const size_t r, const size_t c, cell_t v, const int s)
 {
     v -= 1;
-    m_ch_board[r][c] = s;
+    m_ch_grid[r][c] = s;
     // Set columns.
     for_each_n(m_possible.begin(), ROW_SIZE,
                [c, v, s](possibility_row_t& pos_r) {
@@ -154,7 +166,7 @@ void board::set_possible(const size_t r, const size_t c, cell_t v, const int s)
 
 bool board::set_value(const size_t r, const size_t c, const cell_t v)
 {
-    if (m_ch_board[r][c] == 0) {
+    if (m_ch_grid[r][c] == 0) {
         return false;
     }
 

@@ -22,29 +22,12 @@ public:
     static constexpr cell_t END_VALUE = 10;
 
 private:
-    struct step_change_t final
-    {
-        step_change_t() {}
-
-        step_change_t(step_t s, cell_t v, size_t r, size_t c)
-            : step(s)
-            , val(v)
-            , row(r)
-            , col(c)
-        {}
-
-        step_t step = -1;
-        cell_t val;
-        size_t row = ROW_SIZE;
-        size_t col = COL_SIZE;
-    };
+    using change_row_t = std::array<step_t, COL_SIZE>;
+    using change_grid_t = std::array<change_row_t, ROW_SIZE>;
 
     using possibility_cell_t = std::array<step_t, GRID_SIZE * GRID_SIZE>;
     using possibility_row_t = std::array<possibility_cell_t, COL_SIZE>;
     using possibility_grid_t = std::array<possibility_row_t, ROW_SIZE>;
-
-    using change_row_t = std::array<step_t, COL_SIZE>;
-    using change_grid_t = std::array<change_row_t, ROW_SIZE>;
 
 public:
     board();
@@ -69,11 +52,9 @@ public:
     cell_t value(const size_t r, const size_t c) const { return m_grid[r][c]; }
 
 private:
-    //cell_t find_value(const step_t step) const;
-
-    step_change_t find_change(const step_t step) const;
-
     void init();
+
+    void reset_possible(const size_t r, const size_t c, cell_t v, const int s);
 
     void set_possible(const size_t r, const size_t c, cell_t v, const int s);
 
@@ -82,7 +63,7 @@ private:
 
     step_t m_step = 0;
     possibility_grid_t m_possible;
-    change_grid_t m_ch_board;
+    change_grid_t m_ch_grid;
 };
 
 } // namespace engine
