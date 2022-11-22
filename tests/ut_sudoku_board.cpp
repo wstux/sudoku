@@ -3,6 +3,7 @@
 #include <string>
 
 #include "engine/board.h"
+#include "engine/details/utils.h"
 
 #include "testdefs.h"
 
@@ -19,6 +20,18 @@ const engine::board_t td = {
          {0, 0, 0, 0, 0, 0, 0, 7, 4},
          {0, 0, 5, 2, 0, 6, 3, 0, 0}}
     };
+
+std::string print(const engine::board_t& board)
+{
+    std::stringstream ss;
+    for (size_t i = 0; i < board.size(); ++i) {
+        for (size_t j = 0; j < board[i].size(); ++j) {
+            ss << (size_t)board[i][j] << " ";
+        }
+        ss << std::endl;
+    }
+    return ss.str();
+}
 
 } // <anonymous> namespace
 
@@ -157,6 +170,18 @@ TEST(sudoku_board, set_value_case_3)
     EXPECTED(! sb.is_possible(2, 2, 9));
     EXPECTED(! sb.set_value(2, 2, 9));
     EXPECTED(sb.solution() == td);
+}
+
+TEST(sudoku_board, rollback_case_1)
+{
+    engine::board sb(td);
+    engine::details::solve_single_value_col(sb);
+
+    sb.rollback(0);
+    EXPECTED(sb.current_step() == 0);
+    EXPECTED(sb.solution() == td)
+        << "Etalon: " << std::endl << print(td) << std::endl
+        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
 }
 
 int main()
