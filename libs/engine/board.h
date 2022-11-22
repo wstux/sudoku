@@ -2,8 +2,6 @@
 
 #include <array>
 #include <bitset>
-#include <map>
-#include <stack>
 
 #include "engine/types.h"
 
@@ -30,9 +28,16 @@ private:
         size_t col = COL_SIZE;
     };
     using possibility_cell_t = std::array<step_t, LINE_SIZE>;
-    using possibility_row_t = std::array<possibility_cell_t, COL_SIZE>;
-    using possibility_board_t = std::array<possibility_row_t, ROW_SIZE>;
-    using changes_t = std::map<step_t, step_change_t>;
+    template<typename T>
+    using p_row_t = std::array<T, COL_SIZE>;
+    template<typename T>
+    using p_board_t = std::array<p_row_t<T>, ROW_SIZE>;
+
+    using possibility_row_t = p_row_t<possibility_cell_t>;
+    using possibility_board_t = p_board_t<possibility_cell_t>;
+
+    using change_row_t = p_row_t<step_t>;
+    using change_board_t = p_board_t<step_t>;
 
 public:
     board();
@@ -63,8 +68,6 @@ private:
 
     void init();
 
-    void reset_possible(const size_t r, const size_t c, cell_t v);
-
     void set_possible(const size_t r, const size_t c, cell_t v, const int s);
 
 private:
@@ -73,7 +76,7 @@ private:
     step_t m_step = 0;
     board_t m_solution;
     possibility_board_t m_possible;
-    changes_t m_changes;
+    change_board_t m_ch_board;
 };
 
 } // namespace engine
