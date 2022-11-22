@@ -261,6 +261,28 @@ TEST(sudoku_utils, solve_single_value)
         << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 }
 
+TEST(sudoku_utils, row_by_position)
+{
+    for (size_t i = 0; i < 9; ++i) {
+        for (size_t j = 0; j < 9; ++j) {
+            const size_t pos = i * 9 + j;
+            EXPECTED(engine::details::row_by_position(pos) == i)
+                << "position " << pos << " not equal " << i << " row" << std::endl;
+        }
+    }
+}
+
+TEST(sudoku_utils, col_by_position)
+{
+    for (size_t i = 0; i < 9; ++i) {
+        for (size_t j = 0; j < 9; ++j) {
+            const size_t pos = i * 9 + j;
+            EXPECTED(engine::details::col_by_position(pos) == j)
+                << "position " << pos << " not equal " << j << " col" << std::endl;
+        }
+    }
+}
+
 int main()
 {
     return RUN_TESTS();

@@ -52,7 +52,7 @@ board::step_change_t board::find_change(const step_t step) const
 {
     step_change_t ch;
     for (size_t r = 0; r < m_ch_board.size() && (ch.row == ROW_SIZE); ++r) {
-        for (size_t c = 0; c < m_ch_board[r].size() && (ch.col == COL_SIZE); ++c) {
+        for (size_t c = 0; c < m_ch_board[r].size(); ++c) {
             if (m_ch_board[r][c] == step) {
                 ch.row = r;
                 ch.col = c;
@@ -76,11 +76,12 @@ void board::init()
 {
     m_step = 0;
 
-    for (size_t r = 0; r < ROW_SIZE; ++r) {
-        for (size_t c = 0; c < COL_SIZE; ++c) {
-            m_possible[r][c].fill(-1);
-            m_ch_board[r][c] = -1;
-        }
+    for (size_t p = 0; p < BOARD_SIZE; ++p) {
+        const size_t c = details::col_by_position(p);
+        const size_t r = details::row_by_position(p);
+
+        m_possible[r][c].fill(-1);
+        m_ch_board[r][c] = -1;
     }
     for (possibility_row_t& pos_row : m_possible) {
         for (possibility_cell_t& pos_cell : pos_row) {
@@ -91,7 +92,6 @@ void board::init()
     for (size_t r = 0; r < ROW_SIZE; ++r) {
         for (size_t c = 0; c < COL_SIZE; ++c) {
             if (m_grid[r][c] != 0) {
-                m_ch_board[r][c] = m_step;
                 set_possible(r, c, m_grid[r][c], m_step);
             }
         }
@@ -129,6 +129,7 @@ void board::rollback(const int step)
 void board::set_possible(const size_t r, const size_t c, cell_t v, const int s)
 {
     v -= 1;
+    m_ch_board[r][c] = s;
     // Set columns.
     for_each_n(m_possible.begin(), ROW_SIZE,
                [c, v, s](possibility_row_t& pos_r) {
@@ -159,7 +160,6 @@ bool board::set_value(const size_t r, const size_t c, const cell_t v)
 
     ++m_step;
     m_grid[r][c] = v;
-    m_ch_board[r][c] = m_step;
     set_possible(r, c, v, m_step);
     return true;
 }
