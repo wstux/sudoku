@@ -110,7 +110,7 @@ TEST(sudoku_board, set_value_case_1)
                 << "Grid: Invalid cell [" << r << "; " << c << "] with value '8'" << std::endl;
         }
     }
-    EXPECTED(sb.solution() == expected_board);
+    EXPECTED(sb.grid() == expected_board);
 }
 
 TEST(sudoku_board, set_value_case_2)
@@ -119,7 +119,7 @@ TEST(sudoku_board, set_value_case_2)
 
     EXPECTED(! sb.is_possible(2, 2, 9));
     EXPECTED(! sb.set_value(2, 2, 9));
-    EXPECTED(sb.solution() == td);
+    EXPECTED(sb.grid() == td);
 }
 
 TEST(sudoku_board, rollback_case_1)
@@ -129,9 +129,9 @@ TEST(sudoku_board, rollback_case_1)
 
     sb.rollback(0);
     EXPECTED(sb.current_step() == 0);
-    EXPECTED(sb.solution() == td)
+    EXPECTED(sb.grid() == td)
         << "Etalon: " << std::endl << print(td) << std::endl
-        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
+        << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 }
 
 int main()

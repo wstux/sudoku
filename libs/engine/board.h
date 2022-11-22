@@ -52,9 +52,11 @@ public:
 
     int current_step() const { return m_step; }
 
+    const grid_t& grid() const { return m_grid; }
+
     bool is_possible(const size_t r, const size_t c, const cell_t v) const;
 
-    bool is_set_value(const size_t r, const size_t c) const { return (m_solution[r][c] != 0); }
+    bool is_set_value(const size_t r, const size_t c) const { return (m_grid[r][c] != 0); }
 
     void reset(grid_t b);
 
@@ -64,9 +66,7 @@ public:
 
     bool set_value(const size_t r, const size_t c, const cell_t v);
 
-    const grid_t& solution() const { return m_solution; }
-
-    cell_t value(const size_t r, const size_t c) const { return m_solution[r][c]; }
+    cell_t value(const size_t r, const size_t c) const { return m_grid[r][c]; }
 
 private:
     //cell_t find_value(const step_t step) const;
@@ -78,10 +78,9 @@ private:
     void set_possible(const size_t r, const size_t c, cell_t v, const int s);
 
 private:
-    grid_t m_base_board; // Begin state.
+    grid_t m_grid; // Begin state.
 
     step_t m_step = 0;
-    grid_t m_solution;
     possibility_grid_t m_possible;
     change_grid_t m_ch_board;
 };

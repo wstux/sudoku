@@ -63,9 +63,9 @@ TEST(sudoku_utils, solve_single_cell)
     engine::board sb(td_1);
     engine::details::solve_single_cell(sb);
 
-    EXPECTED(sb.solution() == etalon)
+    EXPECTED(sb.grid() == etalon)
         << "Etalon: " << std::endl << print(etalon) << std::endl
-        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
+        << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 }
 
 TEST(sudoku_utils, solve_single_value_col_case_1)
@@ -85,9 +85,9 @@ TEST(sudoku_utils, solve_single_value_col_case_1)
     engine::board sb(td_1);
     engine::details::solve_single_value_col(sb);
 
-    EXPECTED(sb.solution() == etalon)
+    EXPECTED(sb.grid() == etalon)
         << "Etalon: " << std::endl << print(etalon) << std::endl
-        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
+        << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 }
 
 TEST(sudoku_utils, solve_single_value_col_case_2)
@@ -109,9 +109,9 @@ TEST(sudoku_utils, solve_single_value_col_case_2)
     EXPECTED(sb.value(1, 7) == 1);
     engine::details::solve_single_value_col(sb);
 
-    EXPECTED(sb.solution() == etalon)
+    EXPECTED(sb.grid() == etalon)
         << "Etalon: " << std::endl << print(etalon) << std::endl
-        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
+        << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 }
 
 TEST(sudoku_utils, solve_single_value_row_case_1)
@@ -131,9 +131,9 @@ TEST(sudoku_utils, solve_single_value_row_case_1)
     engine::board sb(td_1);
     engine::details::solve_single_value_row(sb);
 
-    EXPECTED(sb.solution() == etalon)
+    EXPECTED(sb.grid() == etalon)
         << "Etalon: " << std::endl << print(etalon) << std::endl
-        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
+        << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 }
 
 TEST(sudoku_utils, solve_single_value_row_case_2)
@@ -153,9 +153,9 @@ TEST(sudoku_utils, solve_single_value_row_case_2)
     engine::board sb(td_2);
     engine::details::solve_single_value_row(sb);
 
-    EXPECTED(sb.solution() == etalon)
+    EXPECTED(sb.grid() == etalon)
         << "Etalon: " << std::endl << print(etalon) << std::endl
-        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
+        << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 }
 
 TEST(sudoku_utils, solve_single_value_section)
@@ -175,9 +175,9 @@ TEST(sudoku_utils, solve_single_value_section)
     engine::board sb(td_1);
     engine::details::solve_single_value_section(sb);
 
-    EXPECTED(sb.solution() == etalon)
+    EXPECTED(sb.grid() == etalon)
         << "Etalon: " << std::endl << print(etalon) << std::endl
-        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
+        << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 }
 
 TEST(sudoku_utils, solve_single_value)
@@ -232,33 +232,33 @@ TEST(sudoku_utils, solve_single_value)
     engine::details::solve_single_value_col(sb);
     engine::details::solve_single_value_row(sb);
     engine::details::solve_single_value_section(sb);
-    EXPECTED(sb.solution() == etalon_step_1)
+    EXPECTED(sb.grid() == etalon_step_1)
         << "Etalon: " << std::endl << print(etalon_step_1) << std::endl
-        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
+        << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 
     engine::details::solve_single_cell(sb);
     engine::details::solve_single_value_col(sb);
     engine::details::solve_single_value_row(sb);
     engine::details::solve_single_value_section(sb);
-    EXPECTED(sb.solution() == etalon_step_2)
+    EXPECTED(sb.grid() == etalon_step_2)
         << "Etalon: " << std::endl << print(etalon_step_2) << std::endl
-        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
+        << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 
     engine::details::solve_single_cell(sb);
     engine::details::solve_single_value_col(sb);
     engine::details::solve_single_value_row(sb);
     engine::details::solve_single_value_section(sb);
-    EXPECTED(sb.solution() == etalon_step_3)
+    EXPECTED(sb.grid() == etalon_step_3)
         << "Etalon: " << std::endl << print(etalon_step_3) << std::endl
-        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
+        << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 
     engine::details::solve_single_cell(sb);
     engine::details::solve_single_value_col(sb);
     engine::details::solve_single_value_row(sb);
     engine::details::solve_single_value_section(sb);
-    EXPECTED(sb.solution() == etalon_step_4)
+    EXPECTED(sb.grid() == etalon_step_4)
         << "Etalon: " << std::endl << print(etalon_step_4) << std::endl
-        << "Test result: " << std::endl << print(sb.solution()) << std::endl;
+        << "Test result: " << std::endl << print(sb.grid()) << std::endl;
 }
 
 int main()

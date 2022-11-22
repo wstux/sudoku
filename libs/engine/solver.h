@@ -15,7 +15,7 @@ public:
     solver();
     explicit solver(grid_t board);
 
-    grid_t solved_board() const { return m_solver_board.solution(); }
+    grid_t solved_board() const { return m_solver_board.grid(); }
 
     bool solve();
     bool solve(grid_t board);

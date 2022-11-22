@@ -43,7 +43,7 @@ board::board()
 {}
 
 board::board(grid_t b)
-    : m_base_board(std::move(b))
+    : m_grid(std::move(b))
 {
     init();
 }
@@ -90,12 +90,9 @@ void board::init()
 
     for (size_t r = 0; r < ROW_SIZE; ++r) {
         for (size_t c = 0; c < COL_SIZE; ++c) {
-            if (m_base_board[r][c] != 0) {
-                m_solution[r][c] = m_base_board[r][c];
+            if (m_grid[r][c] != 0) {
                 m_ch_board[r][c] = m_step;
-                set_possible(r, c, m_base_board[r][c], m_step);
-            } else {
-                m_solution[r][c] = 0;
+                set_possible(r, c, m_grid[r][c], m_step);
             }
         }
     }
@@ -103,12 +100,12 @@ void board::init()
 
 bool board::is_possible(const size_t r, const size_t c, const cell_t v) const
 {
-    return (m_base_board[r][c] == 0) && (m_possible[r][c][v - 1] == -1);
+    return (m_ch_board[r][c] != 0) && (m_possible[r][c][v - 1] == -1);
 }
 
 void board::reset(grid_t b)
 {
-    m_base_board = std::move(b);
+    m_grid = std::move(b);
     init();
 }
 
@@ -124,7 +121,7 @@ void board::rollback(const int step)
 
         reset_possibility(m_possible, f_ch.val, m_step);
         m_ch_board[f_ch.row][f_ch.col] = -1;
-        m_solution[f_ch.row][f_ch.col] = 0;
+        m_grid[f_ch.row][f_ch.col] = 0;
         --m_step;
     }
 }
@@ -156,12 +153,12 @@ void board::set_possible(const size_t r, const size_t c, cell_t v, const int s)
 
 bool board::set_value(const size_t r, const size_t c, const cell_t v)
 {
-    if (m_base_board[r][c] != 0) {
+    if (m_ch_board[r][c] == 0) {
         return false;
     }
 
     ++m_step;
-    m_solution[r][c] = v;
+    m_grid[r][c] = v;
     m_ch_board[r][c] = m_step;
     set_possible(r, c, v, m_step);
     return true;

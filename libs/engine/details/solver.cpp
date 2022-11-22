@@ -116,7 +116,7 @@ bool solver::is_solved(const grid_t& b)
 
 bool solver::is_solved(const board& brd)
 {
-    const grid_t& b = brd.solution();
+    const grid_t& b = brd.grid();
     return is_solved(b);
 }
 
