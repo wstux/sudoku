@@ -1,2 +1,2 @@
 add_subdirectory(libs/engine)
-#add_subdirectory(tests)
+add_subdirectory(tests)
