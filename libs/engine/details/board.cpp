@@ -99,7 +99,7 @@ void board::init()
     for (size_t r = 0; r < ROW_SIZE; ++r) {
         for (size_t c = 0; c < COL_SIZE; ++c) {
             if (m_grid[r][c] != 0) {
-                set_possible(r, c, m_grid[r][c], m_step);
+                set_impossible(r, c, m_grid[r][c], m_step);
             }
         }
     }
@@ -108,6 +108,36 @@ void board::init()
 bool board::is_possible(const size_t r, const size_t c, const cell_t v) const
 {
     return (m_ch_grid[r][c] != 0) && (m_possible[r][c][v - 1] == -1);
+}
+
+void board::mark_impossible(const size_t r, const size_t c, const cell_t v)
+{
+    mark_impossible(r, c, v, m_step);
+}
+
+void board::mark_impossible(const size_t r, const size_t c, cell_t v, const int s)
+{
+    v -= 1;
+    // Set columns.
+    for_each_n(m_possible.begin(), ROW_SIZE,
+               [c, v, s](possibility_row_t& pos_r) {
+                   set_if(pos_r[c][v], s, [](int var) -> bool { return var == -1; });
+               });
+    // Set rows.
+    for_each_n(m_possible[r].begin(), ROW_SIZE,
+               [v, s](possibility_cell_t& pos_cell) {
+                   set_if(pos_cell[v], s, [](int var) -> bool { return var == -1; });
+               });
+    // Set grid.
+    const size_t start_col = details::grid_start_col(c);
+    const size_t start_row = details::grid_start_row(r);
+    for (size_t row = start_row; row < start_row + GRID_SIZE; ++row) {
+        possibility_row_t& pos_row = m_possible[row];
+        for (size_t col = start_col; col < start_col + GRID_SIZE; ++col) {
+            possibility_cell_t& pos_cell = pos_row[col];
+            set_if(pos_cell[v], s, [](int var) -> bool { return var == -1; });
+        }
+    }
 }
 
 void board::reset(grid_t b)
@@ -142,30 +172,10 @@ void board::rollback(const int step)
     }
 }
 
-void board::set_possible(const size_t r, const size_t c, cell_t v, const int s)
+void board::set_impossible(const size_t r, const size_t c, cell_t v, const int s)
 {
-    v -= 1;
     m_ch_grid[r][c] = s;
-    // Set columns.
-    for_each_n(m_possible.begin(), ROW_SIZE,
-               [c, v, s](possibility_row_t& pos_r) {
-                   set_if(pos_r[c][v], s, [](int var) -> bool { return var == -1; });
-               });
-    // Set rows.
-    for_each_n(m_possible[r].begin(), ROW_SIZE,
-               [v, s](possibility_cell_t& pos_cell) {
-                   set_if(pos_cell[v], s, [](int var) -> bool { return var == -1; });
-               });
-    // Set grid.
-    const size_t start_col = details::grid_start_col(c);
-    const size_t start_row = details::grid_start_row(r);
-    for (size_t row = start_row; row < start_row + GRID_SIZE; ++row) {
-        possibility_row_t& pos_row = m_possible[row];
-        for (size_t col = start_col; col < start_col + GRID_SIZE; ++col) {
-            possibility_cell_t& pos_cell = pos_row[col];
-            set_if(pos_cell[v], s, [](int var) -> bool { return var == -1; });
-        }
-    }
+    mark_impossible(r, c, v, s);
 }
 
 bool board::set_value(const size_t r, const size_t c, const cell_t v)
@@ -176,7 +186,7 @@ bool board::set_value(const size_t r, const size_t c, const cell_t v)
 
     ++m_step;
     m_grid[r][c] = v;
-    set_possible(r, c, v, m_step);
+    set_impossible(r, c, v, m_step);
     return true;
 }
 

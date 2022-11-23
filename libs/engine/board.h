@@ -41,6 +41,8 @@ public:
 
     bool is_set_value(const size_t r, const size_t c) const { return (m_grid[r][c] != 0); }
 
+    void mark_impossible(const size_t r, const size_t c, const cell_t v);
+
     void reset(grid_t b);
 
     void rollback(const int step);
@@ -54,9 +56,11 @@ public:
 private:
     void init();
 
+    void mark_impossible(const size_t r, const size_t c, cell_t v, const int s);
+
     void reset_possible(const size_t r, const size_t c, cell_t v, const int s);
 
-    void set_possible(const size_t r, const size_t c, cell_t v, const int s);
+    void set_impossible(const size_t r, const size_t c, cell_t v, const int s);
 
 private:
     grid_t m_grid; // Begin state.
