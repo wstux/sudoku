@@ -51,7 +51,6 @@ step_change_t find_change(const ch_grid_t& ch_grid, const poss_grid_t& poss_grid
             }
         }
     }
-    assert((ch.row != board::ROW_SIZE) && (ch.col != board::COL_SIZE));
     for (board::cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
         if (poss_grid[ch.row][ch.col][v - 1] == step) {
             ch.val = v;
@@ -66,7 +65,13 @@ step_change_t find_change(const ch_grid_t& ch_grid, const poss_grid_t& poss_grid
 } // <anonymous> namespace
 
 board::board()
-{}
+{
+    for (row_t& row : m_grid) {
+        row.fill(0);
+    }
+
+    init();
+}
 
 board::board(grid_t b)
     : m_grid(std::move(b))
@@ -129,11 +134,10 @@ void board::rollback(const int step)
     }
     while (m_step != step) {
         const step_change_t f_ch = find_change(m_ch_grid, m_possible, m_step);
-        assert(f_ch.step != -1);
-        assert(f_ch.step == m_step);
-
-        reset_possible(f_ch.row, f_ch.col, f_ch.val, m_step);
-        m_grid[f_ch.row][f_ch.col] = 0;
+        if (f_ch.step != -1) {
+            reset_possible(f_ch.row, f_ch.col, f_ch.val, m_step);
+            m_grid[f_ch.row][f_ch.col] = 0;
+        }
         --m_step;
     }
 }
