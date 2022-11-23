@@ -1,6 +1,8 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
+#include <bitset>
 #include <functional>
 
 #include "engine/board.h"
@@ -8,8 +10,24 @@
 namespace engine {
 namespace details {
 
+using random_indices_t = std::array<size_t, board::BOARD_SIZE>;
+
+struct guess_cell_t final
+{
+    using available_t = std::bitset<board::GRID_SIZE * board::GRID_SIZE>;
+
+    bool is_valid() const { return (pos != board::BOARD_SIZE);}
+
+    size_t pos = board::BOARD_SIZE;
+    available_t available;
+};
+
+guess_cell_t find_guess_cell(const board& b, random_indices_t& rand_idx);
+
 inline size_t grid_start_col(const size_t c) { return c - (c % board::GRID_SIZE); }
 inline size_t grid_start_row(const size_t r) { return r - (r % board::GRID_SIZE); }
+
+void init_random();
 
 inline bool is_unique_in_col(const board::grid_t& b, const size_t c, const board::cell_t v)
 {
@@ -40,6 +58,20 @@ inline bool is_unique_in_grid(const board::grid_t& b, const size_t row, const si
 
 inline size_t col_by_position(const size_t p) { return (p % board::COL_SIZE); }
 inline size_t row_by_position(const size_t p) { return (p / board::ROW_SIZE); }
+inline size_t to_position(const size_t r, const size_t c) { return (r * board::ROW_SIZE + c); }
+
+template<typename TArray>
+void shaffle_array(TArray& array)
+{
+    init_random();
+
+    for (size_t i = 0; i < array.size(); ++i) {
+        const size_t tail = array.size() - i;
+        const size_t tail_idx = std::rand() % tail + i;
+
+        std::swap(array[i], array[tail_idx]);
+    }
+}
 
 bool solve_single_cell(engine::board& b);
 bool solve_single_value_col(engine::board& b);

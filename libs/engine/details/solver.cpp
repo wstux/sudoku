@@ -6,54 +6,23 @@
 #include "engine/details/utils.h"
 
 namespace engine {
-namespace {
-
-struct guess_cell_t final
-{
-    using available_t = std::bitset<board::GRID_SIZE * board::GRID_SIZE>;
-
-    bool is_valid = false;
-    size_t row = board::ROW_SIZE;
-    size_t col = board::COL_SIZE;
-    available_t available;
-};
-
-guess_cell_t find_next_cell(const board& b)
-{
-	guess_cell_t guess;
-	guess.available.set();
-	assert(guess.available.count() == guess.available.size());
-	for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
-        const size_t c = details::col_by_position(p);
-        const size_t r = details::row_by_position(p);
-
-	    if (! b.is_set_value(r, c)) {
-		    guess_cell_t::available_t available;
-		    for (board::cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
-			    if (b.is_possible(r, c, v)) {
-			        available[v - 1] = true;
-			    }
-		    }
-		    if (available.count() < guess.available.count()) {
-		        guess.is_valid = true;
-			    guess.row = r;
-			    guess.col = c;
-			    guess.available = available;
-			    assert(guess.available.count() != guess.available.size());
-		    }
-	    }
-	}
-	return guess;
-}
-
-} // <anonymous> namespace
 
 solver::solver()
-{}
+{
+    for (size_t i = 0; i < m_rand_board_idx.size(); ++i) {
+        m_rand_board_idx[i] = i;
+    }
+    details::shaffle_array(m_rand_board_idx);
+}
 
 solver::solver(grid_t board)
     : m_solver_board(std::move(board))
-{}
+{
+    for (size_t i = 0; i < m_rand_board_idx.size(); ++i) {
+        m_rand_board_idx[i] = i;
+    }
+    details::shaffle_array(m_rand_board_idx);
+}
 
 bool solver::is_impossible(const board& b)
 {
@@ -109,12 +78,12 @@ bool solver::solve(grid_t board)
 
 bool solver::solve(const int step)
 {
-    while (solve_single()) {}
+    while (solve_single(m_solver_board)) {}
     if (is_solved(m_solver_board)) { return true; }
     if (is_impossible(m_solver_board)) { return false; }
 
-    guess_cell_t guess = find_next_cell(m_solver_board);
-    if (! guess.is_valid) {
+    details::guess_cell_t guess = details::find_guess_cell(m_solver_board, m_rand_board_idx);
+    if (! guess.is_valid()) {
         return false;
     }
 
@@ -128,7 +97,9 @@ bool solver::solve(const int step)
         const cell_t value = i + 1;
         assert(value > 0 && value < 10);
 
-        m_solver_board.set_value(guess.row, guess.col, value);
+        const size_t c = details::col_by_position(guess.pos);
+        const size_t r = details::row_by_position(guess.pos);
+        m_solver_board.set_value(r, c, value);
         if (is_impossible(m_solver_board) || ! solve(m_solver_board.current_step())) {
             m_solver_board.rollback(step);
         } else {
@@ -138,13 +109,33 @@ bool solver::solve(const int step)
     return false;
 }
 
-bool solver::solve_single()
+bool solver::solve_single(board& b)
 {
-    if (details::solve_single_cell(m_solver_board))          { return true; }
-    if (details::solve_single_value_col(m_solver_board))     { return true; }
-    if (details::solve_single_value_row(m_solver_board))     { return true; }
-    if (details::solve_single_value_section(m_solver_board)) { return true; }
+    if (solve_single_cell(b))          { return true; }
+    if (solve_single_value_col(b))     { return true; }
+    if (solve_single_value_row(b))     { return true; }
+    if (solve_single_value_section(b)) { return true; }
     return false;
+}
+
+bool solver::solve_single_cell(board& b)
+{
+    return details::solve_single_cell(b);
+}
+
+bool solver::solve_single_value_col(board& b)
+{
+    return details::solve_single_value_col(b);
+}
+
+bool solver::solve_single_value_row(board& b)
+{
+    return details::solve_single_value_row(b);
+}
+
+bool solver::solve_single_value_section(board& b)
+{
+    return details::solve_single_value_section(b);
 }
 
 } // namespace engine
