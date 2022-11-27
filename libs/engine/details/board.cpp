@@ -16,12 +16,8 @@ struct step_change_t final
     size_t col = board::COL_SIZE;
 };
 
-using ch_row_t = std::array<board::step_t, board::COL_SIZE>;
-using ch_grid_t = std::array<ch_row_t, board::ROW_SIZE>;
-
-using poss_cell_t = std::array<board::step_t, board::GRID_SIZE * board::GRID_SIZE>;
-using poss_row_t  = std::array<poss_cell_t, board::COL_SIZE>;
-using poss_grid_t = std::array<poss_row_t, board::ROW_SIZE>;
+using changed_fn = std::function<board::step_t(size_t,size_t)>;
+using possible_fn = std::function<board::step_t(size_t,size_t,board::cell_t)>;
 
 template<class TInputIterator, class TUnaryFn>
 inline void for_each_n(TInputIterator it, size_t n, TUnaryFn f)
@@ -39,12 +35,12 @@ inline void set_if(TType& var, const TType& val, TUnaryFn f)
     }
 }
 
-step_change_t find_change(const ch_grid_t& ch_grid, const poss_grid_t& poss_grid, const board::step_t step)
+step_change_t find_change(const changed_fn& ch_step_fn, const possible_fn& poss_step_fn, const board::step_t step)
 {
     step_change_t ch;
-    for (size_t r = 0; r < ch_grid.size() && (ch.row == board::ROW_SIZE); ++r) {
-        for (size_t c = 0; c < ch_grid[r].size(); ++c) {
-            if (ch_grid[r][c] == step) {
+    for (size_t r = 0; r < board::ROW_SIZE && (ch.row == board::ROW_SIZE); ++r) {
+        for (size_t c = 0; c < board::COL_SIZE; ++c) {
+            if (ch_step_fn(r, c) == step) {
                 ch.row = r;
                 ch.col = c;
                 break;
@@ -52,7 +48,7 @@ step_change_t find_change(const ch_grid_t& ch_grid, const poss_grid_t& poss_grid
         }
     }
     for (board::cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
-        if (poss_grid[ch.row][ch.col][v - 1] == step) {
+        if (poss_step_fn(ch.row, ch.col, v) == step) {
             ch.val = v;
             break;
         }
@@ -150,8 +146,8 @@ void board::reset_possible(const size_t r, const size_t c, cell_t v, const int s
 {
     m_ch_grid[r][c] = -1;
 
-    for (poss_row_t& pos_row : m_possible) {
-        for (poss_cell_t& pos_cell : pos_row) {
+    for (possibility_row_t& pos_row : m_possible) {
+        for (possibility_cell_t& pos_cell : pos_row) {
             set_if(pos_cell[v - 1], -1, [s](int var) -> bool { return var == s; });
         }
     }
@@ -162,8 +158,11 @@ void board::rollback(const int step)
     if ((m_step < step) || (step < 0)) {
         return;
     }
+
+    const changed_fn ch_step_fn = [&](size_t r, size_t c) -> step_t { return m_ch_grid[r][c]; };
+    const possible_fn poss_step_fn = [&](size_t r, size_t c, cell_t v) -> step_t { return m_possible[r][c][v - 1]; };
     while (m_step != step) {
-        const step_change_t f_ch = find_change(m_ch_grid, m_possible, m_step);
+        const step_change_t f_ch = find_change(ch_step_fn, poss_step_fn, m_step);
         if (f_ch.step != -1) {
             reset_possible(f_ch.row, f_ch.col, f_ch.val, m_step);
             m_grid[f_ch.row][f_ch.col] = 0;
