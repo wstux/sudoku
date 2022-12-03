@@ -82,7 +82,12 @@ bool solver::solve(const int step)
     if (is_solved(m_solver_board)) { return true; }
     if (is_impossible(m_solver_board)) { return false; }
 
-    details::guess_cell_t guess = details::find_guess_cell(m_solver_board, m_rand_board_idx);
+    const details::is_set_fn_t is_set_fn =
+        [this](size_t r, size_t c) -> bool { return m_solver_board.is_set_value(r, c); };
+    const details::is_poss_fn_t is_poss_fn =
+        [this](size_t r, size_t c, board::cell_t v) -> bool { return m_solver_board.is_possible(r, c, v); };
+
+    details::guess_t guess = details::find_guess_cell(is_set_fn, is_poss_fn, m_rand_board_idx);
     if (! guess.is_valid()) {
         return false;
     }

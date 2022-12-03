@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cstdlib>
 #include <ctime>
 #include "engine/details/utils.h"
@@ -5,32 +6,35 @@
 namespace engine {
 namespace details {
 
-guess_cell_t find_guess_cell(const board& b, random_indices_t& rand_idx)
+guess_t find_guess_cell(const is_set_fn_t& is_set_fn, const is_poss_fn_t& is_poss_fn,
+                        random_indices_t& rand_idx)
 {
     const std::function<size_t(size_t)> pos_fn =
         [&rand_idx](size_t p) -> size_t { return rand_idx[p]; };
 
-	guess_cell_t guess;
-	shaffle_array(rand_idx);
-	for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
+    guess_t guess;
+    guess.available.set();
+    assert(guess.available.size() == guess.available.count());
+
+    shaffle_array(rand_idx);
+    for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
         const size_t c = col_by_position(pos_fn(p));
         const size_t r = row_by_position(pos_fn(p));
+        guess_t::available_t available;
 
-	    if (! b.is_set_value(r, c)) {
-		    for (board::cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
-			    if (b.is_possible(r, c, v)) {
-			        guess.available[v - 1] = true;
-			    }
-		    }
-		    if (guess.available.count() <= guess.available.count()) {
-			    guess.pos = to_position(r, c);
-			    return guess;
-		    } else {
-		        guess.available.reset();
-		    }
-	    }
-	}
-	return guess;
+        if (! is_set_fn(r, c)) {
+            for (board::cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
+                if (is_poss_fn(r, c, v)) {
+                    available[v - 1] = true;
+                }
+            }
+            if ((available.count() > 0) && (guess.available.count() > available.count())) {
+                guess.available = available;
+                guess.pos = to_position(r, c);
+            }
+        }
+    }
+    return guess;
 }
 
 void init_random()

@@ -10,9 +10,11 @@
 namespace engine {
 namespace details {
 
+using is_poss_fn_t = std::function<bool(size_t,size_t,board::cell_t)>;
+using is_set_fn_t = std::function<bool(size_t,size_t)>;
 using random_indices_t = std::array<size_t, board::BOARD_SIZE>;
 
-struct guess_cell_t final
+struct guess_t final
 {
     using available_t = std::bitset<board::GRID_SIZE * board::GRID_SIZE>;
 
@@ -22,7 +24,8 @@ struct guess_cell_t final
     available_t available;
 };
 
-guess_cell_t find_guess_cell(const board& b, random_indices_t& rand_idx);
+guess_t find_guess_cell(const is_set_fn_t& is_set_fn, const is_poss_fn_t& is_poss_fn,
+                        random_indices_t& rand_idx);
 
 inline size_t grid_start_col(const size_t c) { return c - (c % board::GRID_SIZE); }
 inline size_t grid_start_row(const size_t r) { return r - (r % board::GRID_SIZE); }

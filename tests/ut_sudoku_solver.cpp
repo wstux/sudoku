@@ -44,7 +44,7 @@ std::string print(const engine::board::grid_t& board)
 
 } // <anonymous> namespace
 
-TEST(sudoku_solver, case_1)
+TEST(sudoku_solver, single_solve)
 {
     const engine::board::grid_t td = {
         {{3, 0, 6, 5, 0, 8, 4, 0, 0},
@@ -79,7 +79,7 @@ TEST(sudoku_solver, case_1)
                             << "Test result: " << std::endl << print(res) << std::endl;
 }
 
-TEST(sudoku_solver, case_2)
+TEST(sudoku_solver, guess_case_1)
 {
     const engine::board::grid_t td = {
         {{0, 0, 0, 2, 0, 0, 0, 5, 0},
@@ -114,7 +114,7 @@ TEST(sudoku_solver, case_2)
                             << "Test result: " << std::endl << print(res) << std::endl;
 }
 
-TEST(sudoku_solver, case_3)
+TEST(sudoku_solver, guess_case_2)
 {
     const engine::board::grid_t td = {
         {{0, 8, 0, 0, 0, 0, 0, 2, 0},
