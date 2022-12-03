@@ -64,15 +64,13 @@ board::grid_t generator::generate()
     const rotate rand_rotate = randomizer();
     for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
         details::shaffle_array(m_rand_board_idx);
-        const size_t rand_pos = rotate_position(p, rand_rotate);
-        const size_t c = details::col_by_position(random_pos(rand_pos));
-        const size_t r = details::row_by_position(random_pos(rand_pos));
+        const size_t rand_pos = random_pos(rotate_position(p, rand_rotate));
 
-        if (! m_board.is_set_value(r, c)) {
+        if (! m_board.is_set_value(rand_pos)) {
             continue;
         }
-        [[maybe_unused]] const board::cell_t orig_val = m_board.value(r, c);
-        m_board.set_value(r, c, 0);
+        [[maybe_unused]] const board::cell_t orig_val = m_board.value(rand_pos);
+        m_board.set_value(rand_pos, 0);
     }
 
     return m_board.grid();

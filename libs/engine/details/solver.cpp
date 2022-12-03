@@ -27,13 +27,10 @@ solver::solver(grid_t board)
 bool solver::is_impossible(const board& b)
 {
     for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
-        const size_t c = details::col_by_position(p);
-        const size_t r = details::row_by_position(p);
-
-        if (! b.is_set_value(r, c)) {
+        if (! b.is_set_value(p)) {
             size_t count = 0;
             for (cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
-                if (b.is_possible(r, c, v)) {
+                if (b.is_possible(p, v)) {
                     ++count;
                 }
             }
@@ -83,9 +80,9 @@ bool solver::solve(const int step)
     if (is_impossible(m_solver_board)) { return false; }
 
     const details::is_set_fn_t is_set_fn =
-        [this](size_t r, size_t c) -> bool { return m_solver_board.is_set_value(r, c); };
+        [this](size_t p) -> bool { return m_solver_board.is_set_value(p); };
     const details::is_poss_fn_t is_poss_fn =
-        [this](size_t r, size_t c, board::cell_t v) -> bool { return m_solver_board.is_possible(r, c, v); };
+        [this](size_t p, board::cell_t v) -> bool { return m_solver_board.is_possible(p, v); };
 
     details::guess_t guess = details::find_guess_cell(is_set_fn, is_poss_fn, m_rand_board_idx);
     if (! guess.is_valid()) {
@@ -102,9 +99,7 @@ bool solver::solve(const int step)
         const cell_t value = i + 1;
         assert(value > 0 && value < 10);
 
-        const size_t c = details::col_by_position(guess.pos);
-        const size_t r = details::row_by_position(guess.pos);
-        m_solver_board.set_value(r, c, value);
+        m_solver_board.set_value(guess.pos, value);
         if (is_impossible(m_solver_board) || ! solve(m_solver_board.current_step())) {
             m_solver_board.rollback(step);
         } else {

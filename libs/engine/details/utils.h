@@ -10,8 +10,8 @@
 namespace engine {
 namespace details {
 
-using is_poss_fn_t = std::function<bool(size_t,size_t,board::cell_t)>;
-using is_set_fn_t = std::function<bool(size_t,size_t)>;
+using is_poss_fn_t = std::function<bool(size_t,board::cell_t)>;
+using is_set_fn_t = std::function<bool(size_t)>;
 using random_indices_t = std::array<size_t, board::BOARD_SIZE>;
 
 struct guess_t final

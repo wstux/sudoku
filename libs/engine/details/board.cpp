@@ -96,14 +96,20 @@ void board::init()
     }
 }
 
-bool board::is_possible(const size_t r, const size_t c, const cell_t v) const
+bool board::is_possible(const size_t p, const cell_t v) const
 {
-    return (m_ch_grid[r][c] != 0) && (m_possible[r][c][v - 1].d.step == -1);
+    return (m_ch_grid[details::row_by_position(p)][details::col_by_position(p)] != 0) &&
+           (m_possible[details::row_by_position(p)][details::col_by_position(p)][v - 1].d.step == -1);
 }
 
-void board::mark_impossible(const size_t r, const size_t c, const cell_t v)
+bool board::is_set_value(const size_t p) const
 {
-    mark_impossible(r, c, v, m_step, DEFAULT_TAG);
+    return (m_grid[details::row_by_position(p)][details::col_by_position(p)] != 0);
+}
+
+void board::mark_impossible(const size_t p, const cell_t v, const tag_t t)
+{
+    mark_impossible(details::row_by_position(p), details::col_by_position(p), v, m_step, t);
 }
 
 void board::mark_impossible(const size_t r, const size_t c, cell_t v, const step_t s, const tag_t t)
@@ -179,9 +185,14 @@ void board::set_impossible(const size_t r, const size_t c, cell_t v, const step_
     mark_impossible(r, c, v, s, t);
 }
 
-bool board::set_value(const size_t r, const size_t c, const cell_t v)
+bool board::set_value(const size_t p, const cell_t v)
 {
-    return set_value(r, c, v, DEFAULT_TAG);
+    return set_value(details::row_by_position(p), details::col_by_position(p), v, DEFAULT_TAG);
+}
+
+bool board::set_value(const size_t p, const cell_t v, const tag_t t)
+{
+    return set_value(details::row_by_position(p), details::col_by_position(p), v, t);
 }
 
 bool board::set_value(const size_t r, const size_t c, const cell_t v, const tag_t t)
@@ -194,6 +205,11 @@ bool board::set_value(const size_t r, const size_t c, const cell_t v, const tag_
     m_grid[r][c] = v;
     set_impossible(r, c, v, m_step, t);
     return true;
+}
+
+board::cell_t board::value(const size_t p) const
+{
+    return m_grid[details::row_by_position(p)][details::col_by_position(p)];
 }
 
 } // namespace engine

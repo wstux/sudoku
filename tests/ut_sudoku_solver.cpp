@@ -2,6 +2,7 @@
 #include <string>
 
 #include "engine/solver.h"
+#include "engine/details/utils.h"
 
 #include "testdefs.h"
 
@@ -30,6 +31,11 @@ const engine::board::grid_t td_2 = {
          {0, 2, 0, 0, 0, 8, 0, 0, 0}}
     };
 
+bool is_set_value(const engine::board& b, const size_t r, const size_t c)
+{
+    return b.is_set_value(engine::details::to_position(r, c));
+}
+
 std::string print(const engine::board::grid_t& board)
 {
     std::stringstream ss;
@@ -40,6 +46,11 @@ std::string print(const engine::board::grid_t& board)
         ss << std::endl;
     }
     return ss.str();
+}
+
+engine::board::cell_t value(const engine::board& b, const size_t r, const size_t c)
+{
+    return b.value(engine::details::to_position(r, c));
 }
 
 } // <anonymous> namespace
@@ -208,8 +219,8 @@ TEST(sudoku_solver, solve_single_value_col_case_2)
     };
 
     engine::board sb(td_2);
-    EXPECTED(sb.is_set_value(1, 7));
-    EXPECTED(sb.value(1, 7) == 1);
+    EXPECTED(is_set_value(sb, 1, 7));
+    EXPECTED(value(sb, 1, 7) == 1);
     engine::solver::solve_single_value_col(sb);
 
     EXPECTED(sb.grid() == etalon)
