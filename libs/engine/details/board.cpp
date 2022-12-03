@@ -83,19 +83,14 @@ void board::init()
         const size_t c = details::col_by_position(p);
         const size_t r = details::row_by_position(p);
 
-        m_possible[r][c].fill(-1);
+        m_possible[r][c].fill(data_t(-1, DEFAULT_TAG));
         m_ch_grid[r][c] = -1;
-    }
-    for (possibility_row_t& pos_row : m_possible) {
-        for (possibility_cell_t& pos_cell : pos_row) {
-            pos_cell.fill(-1);
-        }
     }
 
     for (size_t r = 0; r < ROW_SIZE; ++r) {
         for (size_t c = 0; c < COL_SIZE; ++c) {
             if (m_grid[r][c] != 0) {
-                set_impossible(r, c, m_grid[r][c], m_step);
+                set_impossible(r, c, m_grid[r][c], m_step, DEFAULT_TAG);
             }
         }
     }
@@ -103,35 +98,36 @@ void board::init()
 
 bool board::is_possible(const size_t r, const size_t c, const cell_t v) const
 {
-    return (m_ch_grid[r][c] != 0) && (m_possible[r][c][v - 1] == -1);
+    return (m_ch_grid[r][c] != 0) && (m_possible[r][c][v - 1].d.step == -1);
 }
 
 void board::mark_impossible(const size_t r, const size_t c, const cell_t v)
 {
-    mark_impossible(r, c, v, m_step);
+    mark_impossible(r, c, v, m_step, DEFAULT_TAG);
 }
 
-void board::mark_impossible(const size_t r, const size_t c, cell_t v, const int s)
+void board::mark_impossible(const size_t r, const size_t c, cell_t v, const step_t s, const tag_t t)
 {
     v -= 1;
+    const data_t d(s, t);
     // Set columns.
     for_each_n(m_possible.begin(), ROW_SIZE,
-               [c, v, s](possibility_row_t& pos_r) {
-                   set_if(pos_r[c][v], s, [](int var) -> bool { return var == -1; });
+               [c, v, d](poss_row_t& pos_r) {
+                   set_if(pos_r[c][v], d, [](data_t var) -> bool { return var.d.step == -1; });
                });
     // Set rows.
     for_each_n(m_possible[r].begin(), ROW_SIZE,
-               [v, s](possibility_cell_t& pos_cell) {
-                   set_if(pos_cell[v], s, [](int var) -> bool { return var == -1; });
+               [v, d](poss_cell_t& pos_cell) {
+                   set_if(pos_cell[v], d, [](data_t var) -> bool { return var.d.step == -1; });
                });
     // Set grid.
     const size_t start_col = details::grid_start_col(c);
     const size_t start_row = details::grid_start_row(r);
     for (size_t row = start_row; row < start_row + GRID_SIZE; ++row) {
-        possibility_row_t& pos_row = m_possible[row];
+        poss_row_t& pos_row = m_possible[row];
         for (size_t col = start_col; col < start_col + GRID_SIZE; ++col) {
-            possibility_cell_t& pos_cell = pos_row[col];
-            set_if(pos_cell[v], s, [](int var) -> bool { return var == -1; });
+            poss_cell_t& pos_cell = pos_row[col];
+            set_if(pos_cell[v], d, [](data_t var) -> bool { return var.d.step == -1; });
         }
     }
 }
@@ -142,42 +138,53 @@ void board::reset(grid_t b)
     init();
 }
 
-void board::reset_possible(const size_t r, const size_t c, cell_t v, const int s)
+void board::reset_possible(const size_t r, const size_t c, cell_t v, const step_t s, const tag_t t)
 {
     m_ch_grid[r][c] = -1;
 
-    for (possibility_row_t& pos_row : m_possible) {
-        for (possibility_cell_t& pos_cell : pos_row) {
-            set_if(pos_cell[v - 1], -1, [s](int var) -> bool { return var == s; });
+    const data_t d(s, t);
+    for (poss_row_t& pos_row : m_possible) {
+        for (poss_cell_t& pos_cell : pos_row) {
+            set_if(pos_cell[v - 1], data_t(-1, DEFAULT_TAG), [d](data_t var) -> bool { return var.d.step == d.d.step; });
         }
     }
 }
 
-void board::rollback(const int step)
+void board::rollback(const step_t step)
 {
-    if ((m_step < step) || (step < 0)) {
+    rollback(step, DEFAULT_TAG);
+}
+
+void board::rollback(const step_t step, const tag_t t)
+{
+    if (step < 0) {
         return;
     }
 
     const changed_fn ch_step_fn = [&](size_t r, size_t c) -> step_t { return m_ch_grid[r][c]; };
-    const possible_fn poss_step_fn = [&](size_t r, size_t c, cell_t v) -> step_t { return m_possible[r][c][v - 1]; };
+    const possible_fn poss_step_fn = [&](size_t r, size_t c, cell_t v) -> step_t { return m_possible[r][c][v - 1].d.step; };
     while (m_step != step) {
         const step_change_t f_ch = find_change(ch_step_fn, poss_step_fn, m_step);
         if (f_ch.step != -1) {
-            reset_possible(f_ch.row, f_ch.col, f_ch.val, m_step);
+            reset_possible(f_ch.row, f_ch.col, f_ch.val, m_step, t);
             m_grid[f_ch.row][f_ch.col] = 0;
         }
         --m_step;
     }
 }
 
-void board::set_impossible(const size_t r, const size_t c, cell_t v, const int s)
+void board::set_impossible(const size_t r, const size_t c, cell_t v, const step_t s, const tag_t t)
 {
     m_ch_grid[r][c] = s;
-    mark_impossible(r, c, v, s);
+    mark_impossible(r, c, v, s, t);
 }
 
 bool board::set_value(const size_t r, const size_t c, const cell_t v)
+{
+    return set_value(r, c, v, DEFAULT_TAG);
+}
+
+bool board::set_value(const size_t r, const size_t c, const cell_t v, const tag_t t)
 {
     if (m_ch_grid[r][c] == 0) {
         return false;
@@ -185,7 +192,7 @@ bool board::set_value(const size_t r, const size_t c, const cell_t v)
 
     ++m_step;
     m_grid[r][c] = v;
-    set_impossible(r, c, v, m_step);
+    set_impossible(r, c, v, m_step, t);
     return true;
 }
 
