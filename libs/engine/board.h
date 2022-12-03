@@ -19,6 +19,9 @@ public:
     using row_t = std::array<value_t, COL_SIZE>;
     using grid_t = std::array<row_t, ROW_SIZE>;
 
+    static constexpr tag_t DEFAULT_TAG = 0;
+    static constexpr tag_t BEGIN_TAG = 1;
+    static constexpr tag_t INVALID_TAG = -1;
     static constexpr value_t BEGIN_VALUE = 1;
     static constexpr value_t END_VALUE = 10;
 
@@ -32,7 +35,7 @@ public:
 
     bool is_possible(const size_t p, const value_t v) const;
 
-    bool is_set_value(const size_t p) const;
+    bool is_set_value(const size_t p) const { return (m_grid[to_row(p)][to_col(p)] != 0); }
 
     void mark_impossible(const size_t p, const value_t v, const tag_t t);
 
@@ -48,7 +51,7 @@ public:
 
     bool set_value(const size_t p, const value_t v, const tag_t t);
 
-    value_t value(const size_t p) const;
+    value_t value(const size_t p) const { return m_grid[to_row(p)][to_col(p)]; }
 
 private:
     void init();
@@ -59,11 +62,11 @@ private:
 
     void set_impossible(const size_t r, const size_t c, value_t v, const step_t s, const tag_t t);
 
-    bool set_value(const size_t r, const size_t c, const value_t v, const tag_t t);
+    static size_t to_col(const size_t p);
+
+    static size_t to_row(const size_t p);
 
 private:
-    static constexpr tag_t DEFAULT_TAG = 0;
-
     union data_t
     {
         data_t()
