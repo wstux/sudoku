@@ -21,12 +21,12 @@ const engine::board::grid_t td = {
          {0, 0, 5, 2, 0, 6, 3, 0, 0}}
     };
 
-bool is_possible(const engine::board& b, const size_t r, const size_t c, const engine::board::cell_t& v)
+bool is_possible(const engine::board& b, const size_t r, const size_t c, const engine::board::value_t& v)
 {
     return b.is_possible(engine::details::to_position(r, c), v);
 }
 
-bool set_value(engine::board& b, const size_t r, const size_t c, const engine::board::cell_t& v)
+bool set_value(engine::board& b, const size_t r, const size_t c, const engine::board::value_t& v)
 {
     return b.set_value(engine::details::to_position(r, c), v);
 }

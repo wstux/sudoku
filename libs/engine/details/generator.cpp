@@ -69,7 +69,7 @@ board::grid_t generator::generate()
         if (! m_board.is_set_value(rand_pos)) {
             continue;
         }
-        [[maybe_unused]] const board::cell_t orig_val = m_board.value(rand_pos);
+        [[maybe_unused]] const board::value_t orig_val = m_board.value(rand_pos);
         m_board.set_value(rand_pos, 0);
     }
 

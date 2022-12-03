@@ -48,7 +48,7 @@ std::string print(const engine::board::grid_t& board)
     return ss.str();
 }
 
-engine::board::cell_t value(const engine::board& b, const size_t r, const size_t c)
+engine::board::value_t value(const engine::board& b, const size_t r, const size_t c)
 {
     return b.value(engine::details::to_position(r, c));
 }

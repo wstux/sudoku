@@ -19,7 +19,7 @@ guess_t find_guess_cell(const is_set_fn_t& is_set_fn, const is_poss_fn_t& is_pos
         const size_t pos = rand_idx[p];
 
         if (! is_set_fn(pos)) {
-            for (board::cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
+            for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
                 if (is_poss_fn(pos, v)) {
                     available[v - 1] = true;
                 }
@@ -50,8 +50,8 @@ bool solve_single_cell(board& b)
             continue;
         }
         size_t count = 0;
-        board::cell_t possible_val = 0;
-        for (board::cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
+        board::value_t possible_val = 0;
+        for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
             if (b.is_possible(p, v)) {
                 ++count;
                 possible_val = v;
@@ -69,10 +69,10 @@ bool solve_single_value_col(board& b)
 {
     bool is_found = false;
     for (size_t c = 0; c < board::COL_SIZE; ++c) {
-        for (board::cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
+        for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
             size_t count = 0;
             size_t possible_pos = 0;
-            board::cell_t possible_val = 0;
+            board::value_t possible_val = 0;
             for (size_t r = 0; r < board::ROW_SIZE; ++r) {
                 const size_t p = to_position(r, c);
                 if (! b.is_set_value(p) && b.is_possible(p, v)) {
@@ -94,10 +94,10 @@ bool solve_single_value_row(board& b)
 {
     bool is_found = false;
     for (size_t r = 0; r < board::ROW_SIZE; ++r) {
-        for (board::cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
+        for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
             size_t count = 0;
             size_t possible_pos = 0;
-            board::cell_t possible_val = 0;
+            board::value_t possible_val = 0;
             for (size_t c = 0; c < board::COL_SIZE; ++c) {
                 const size_t p = to_position(r, c);
                 if (! b.is_set_value(p) && b.is_possible(p, v)) {
@@ -127,8 +127,8 @@ bool solve_single_value_section(board& b)
                     continue;
                 }
                 size_t count = 0;
-                board::cell_t possible_val = 0;
-                for (board::cell_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
+                board::value_t possible_val = 0;
+                for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
                     if (b.is_possible(p, v)) {
                         ++count;
                         possible_val = v;

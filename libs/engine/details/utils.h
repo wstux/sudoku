@@ -10,7 +10,7 @@
 namespace engine {
 namespace details {
 
-using is_poss_fn_t = std::function<bool(size_t,board::cell_t)>;
+using is_poss_fn_t = std::function<bool(size_t,board::value_t)>;
 using is_set_fn_t = std::function<bool(size_t)>;
 using random_indices_t = std::array<size_t, board::BOARD_SIZE>;
 
@@ -32,19 +32,19 @@ inline size_t grid_start_row(const size_t r) { return r - (r % board::GRID_SIZE)
 
 void init_random();
 
-inline bool is_unique_in_col(const board::grid_t& b, const size_t c, const board::cell_t v)
+inline bool is_unique_in_col(const board::grid_t& b, const size_t c, const board::value_t v)
 {
     const std::function<bool(const board::row_t&)> is_in_col_fn =
         [c, v](const board::row_t& row) -> bool { return (row[c] == v); };
     return (std::count_if(b.cbegin(), b.cend(), is_in_col_fn) == 1);
 }
 
-inline bool is_unique_in_row(const board::grid_t& b, const size_t r, const board::cell_t v)
+inline bool is_unique_in_row(const board::grid_t& b, const size_t r, const board::value_t v)
 {
     return (std::count(b[r].cbegin(), b[r].cend(), v) == 1);
 }
 
-inline bool is_unique_in_grid(const board::grid_t& b, const size_t row, const size_t col, const board::cell_t v)
+inline bool is_unique_in_grid(const board::grid_t& b, const size_t row, const size_t col, const board::value_t v)
 {
     const size_t start_col = grid_start_col(col);
     const size_t start_row = grid_start_row(row);

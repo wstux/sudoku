@@ -13,14 +13,14 @@ public:
     static constexpr size_t ROW_SIZE = 9;
     static constexpr size_t BOARD_SIZE = COL_SIZE * ROW_SIZE;
 
-    using cell_t = char;
+    using value_t = char;
     using step_t = int32_t;
     using tag_t = char;
-    using row_t = std::array<cell_t, COL_SIZE>;
+    using row_t = std::array<value_t, COL_SIZE>;
     using grid_t = std::array<row_t, ROW_SIZE>;
 
-    static constexpr cell_t BEGIN_VALUE = 1;
-    static constexpr cell_t END_VALUE = 10;
+    static constexpr value_t BEGIN_VALUE = 1;
+    static constexpr value_t END_VALUE = 10;
 
 public:
     board();
@@ -30,11 +30,11 @@ public:
 
     const grid_t& grid() const { return m_grid; }
 
-    bool is_possible(const size_t p, const cell_t v) const;
+    bool is_possible(const size_t p, const value_t v) const;
 
     bool is_set_value(const size_t p) const;
 
-    void mark_impossible(const size_t p, const cell_t v, const tag_t t);
+    void mark_impossible(const size_t p, const value_t v, const tag_t t);
 
     void reset(grid_t b);
 
@@ -44,22 +44,22 @@ public:
 
     void rollback_last() { rollback(m_step - 1); }
 
-    bool set_value(const size_t p, const cell_t v);
+    bool set_value(const size_t p, const value_t v);
 
-    bool set_value(const size_t p, const cell_t v, const tag_t t);
+    bool set_value(const size_t p, const value_t v, const tag_t t);
 
-    cell_t value(const size_t p) const;
+    value_t value(const size_t p) const;
 
 private:
     void init();
 
-    void mark_impossible(const size_t r, const size_t c, cell_t v, const step_t s, const tag_t t);
+    void mark_impossible(const size_t r, const size_t c, value_t v, const step_t s, const tag_t t);
 
-    void reset_possible(const size_t r, const size_t c, cell_t v, const step_t s, const tag_t t);
+    void reset_possible(const size_t p, value_t v, const step_t s, const tag_t t);
 
-    void set_impossible(const size_t r, const size_t c, cell_t v, const step_t s, const tag_t t);
+    void set_impossible(const size_t r, const size_t c, value_t v, const step_t s, const tag_t t);
 
-    bool set_value(const size_t r, const size_t c, const cell_t v, const tag_t t);
+    bool set_value(const size_t r, const size_t c, const value_t v, const tag_t t);
 
 private:
     static constexpr tag_t DEFAULT_TAG = 0;
@@ -92,8 +92,8 @@ private:
     using change_row_t = std::array<step_t, COL_SIZE>;
     using change_grid_t = std::array<change_row_t, ROW_SIZE>;
 
-    using poss_cell_t = std::array<data_t, GRID_SIZE * GRID_SIZE>;
-    using poss_row_t = std::array<poss_cell_t, COL_SIZE>;
+    using poss_value_t = std::array<data_t, GRID_SIZE * GRID_SIZE>;
+    using poss_row_t = std::array<poss_value_t, COL_SIZE>;
     using poss_grid_t = std::array<poss_row_t, ROW_SIZE>;
 
 private:

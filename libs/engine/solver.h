@@ -12,7 +12,7 @@ private:
     using random_indices_t = std::array<size_t, board::BOARD_SIZE>;
 
 public:
-    using cell_t = board::cell_t;
+    using value_t = board::value_t;
     using grid_t = board::grid_t;
 
     solver();
