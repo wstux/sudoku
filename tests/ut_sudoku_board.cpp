@@ -132,13 +132,13 @@ TEST(sudoku_board, set_value_case_2)
     EXPECTED(sb.grid() == td);
 }
 
-TEST(sudoku_board, rollback_case_1)
+TEST(sudoku_board, rollback)
 {
     engine::board sb(td);
     engine::details::solve_single_value_col(sb);
 
-    sb.rollback(0);
-    EXPECTED(sb.current_step() == 0);
+    sb.rollback_to_tag(engine::board::DEFAULT_TAG);
+    EXPECTED(sb.current_tag() == 0);
     EXPECTED(sb.grid() == td)
         << "Etalon: " << std::endl << print(td) << std::endl
         << "Test result: " << std::endl << print(sb.grid()) << std::endl;

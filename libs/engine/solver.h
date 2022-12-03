@@ -35,7 +35,7 @@ public:
     static bool solve_single_value_section(board& b);
 
 private:
-    bool solve(const int step);
+    bool solve(const board::tag_t tag);
 
 private:
     board m_solver_board;

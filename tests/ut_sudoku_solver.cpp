@@ -1,3 +1,4 @@
+#include <limits>
 #include <sstream>
 #include <string>
 
@@ -158,6 +159,26 @@ TEST(sudoku_solver, guess_case_2)
     EXPECTED(engine::solver::is_solved(res));
     EXPECTED(etalon == res) << "Etalon: " << std::endl << print(etalon) << std::endl
                             << "Test result: " << std::endl << print(res) << std::endl;
+}
+
+TEST(sudoku_solver, guess_case_3)
+{
+    const engine::board::grid_t td = {
+        {{0, 8, 0, 0, 0, 0, 0, 2, 0},
+         {5, 9, 0, 0, 3, 0, 0, 4, 1},
+         {4, 0, 0, 9, 0, 5, 0, 0, 6},
+         {0, 0, 0, 2, 7, 3, 0, 0, 0},
+         {0, 0, 0, 8, 0, 9, 0, 0, 0},
+         {9, 0, 0, 0, 1, 0, 0, 0, 2},
+         {0, 7, 0, 0, 0, 0, 0, 1, 0},
+         {0, 3, 9, 0, 0, 0, 2, 5, 0},
+         {2, 0, 0, 0, 0, 0, 0, 0, 4}}
+    };
+
+    for (size_t i = 0; i < std::numeric_limits<char>::max(); ++i) {
+        engine::solver sl;
+        EXPECTED(sl.solve(td));
+    }
 }
 
 TEST(sudoku_solver, solve_single_cell)

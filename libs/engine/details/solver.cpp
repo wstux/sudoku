@@ -64,16 +64,16 @@ bool solver::is_solved(const board& brd)
 
 bool solver::solve()
 {
-    return solve(m_solver_board.current_step());
+    return solve(m_solver_board.current_tag());
 }
 
 bool solver::solve(grid_t board)
 {
     m_solver_board.reset(std::move(board));
-    return solve(m_solver_board.current_step());
+    return solve(m_solver_board.current_tag());
 }
 
-bool solver::solve(const int step)
+bool solver::solve(const board::tag_t tag)
 {
     while (solve_single(m_solver_board)) {}
     if (is_solved(m_solver_board)) { return true; }
@@ -100,8 +100,8 @@ bool solver::solve(const int step)
         assert(value > 0 && value < 10);
 
         m_solver_board.set_value(guess.pos, value);
-        if (is_impossible(m_solver_board) || ! solve(m_solver_board.current_step())) {
-            m_solver_board.rollback(step);
+        if (is_impossible(m_solver_board) || ! solve(m_solver_board.current_tag())) {
+            m_solver_board.rollback_to_tag(tag);
         } else {
             return true;
         }
