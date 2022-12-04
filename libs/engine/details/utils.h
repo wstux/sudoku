@@ -76,10 +76,10 @@ void shaffle_array(TArray& array)
     }
 }
 
-bool solve_single_cell(engine::board& b);
-bool solve_single_value_col(engine::board& b);
-bool solve_single_value_row(engine::board& b);
-bool solve_single_value_section(engine::board& b);
+bool solve_single_cell(board& b, const board::tag_t t);
+bool solve_single_value_col(board& b, const board::tag_t t);
+bool solve_single_value_row(board& b, const board::tag_t t);
+bool solve_single_value_section(board& b, const board::tag_t t);
 
 } // namespace details
 } // namespace engine

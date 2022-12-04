@@ -161,12 +161,7 @@ void board::set_impossible(const size_t r, const size_t c, value_t v, const tag_
     mark_impossible(r, c, v, t);
 }
 
-bool board::set_value(const size_t p, const value_t v)
-{
-    return set_value(p, v, DEFAULT_TAG);
-}
-
-bool board::set_value(const size_t p, const value_t v, const tag_t /*t*/)
+bool board::set_value(const size_t p, const value_t v, const tag_t t)
 {
     const size_t c = to_col(p);
     const size_t r = to_row(p);
@@ -175,9 +170,9 @@ bool board::set_value(const size_t p, const value_t v, const tag_t /*t*/)
         return false;
     }
 
-    ++m_tag;
+    m_tag = std::max(m_tag, t);
     m_grid[r][c] = v;
-    set_impossible(r, c, v, m_tag);
+    set_impossible(r, c, v, t);
     return true;
 }
 

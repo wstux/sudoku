@@ -28,8 +28,6 @@ public:
     board();
     explicit board(grid_t g);
 
-    tag_t current_tag() const { return m_tag; }
-
     const grid_t& grid() const { return m_grid; }
 
     bool is_possible(const size_t p, const value_t v) const;
@@ -43,8 +41,6 @@ public:
     void rollback(const tag_t t);
 
     void rollback_to_tag(const tag_t t);
-
-    bool set_value(const size_t p, const value_t v);
 
     bool set_value(const size_t p, const value_t v, const tag_t t);
 

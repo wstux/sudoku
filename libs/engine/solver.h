@@ -28,11 +28,7 @@ public:
     static bool is_solved(const grid_t& b);
     static bool is_solved(const board& brd);
 
-    static bool solve_single(board& b);
-    static bool solve_single_cell(board& b);
-    static bool solve_single_value_col(board& b);
-    static bool solve_single_value_row(board& b);
-    static bool solve_single_value_section(board& b);
+    static bool solve_single(board& b, const board::tag_t t);
 
 private:
     bool solve(const board::tag_t tag);

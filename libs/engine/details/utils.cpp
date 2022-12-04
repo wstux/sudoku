@@ -42,7 +42,7 @@ void init_random()
     }
 }
 
-bool solve_single_cell(board& b)
+bool solve_single_cell(board& b, const board::tag_t t)
 {
     bool is_found = false;
     for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
@@ -58,14 +58,14 @@ bool solve_single_cell(board& b)
             }
         }
         if (count == 1) {
-            b.set_value(p, possible_val);
+            b.set_value(p, possible_val, t);
             is_found = true;
         }
     }
     return is_found;
 }
 
-bool solve_single_value_col(board& b)
+bool solve_single_value_col(board& b, const board::tag_t t)
 {
     bool is_found = false;
     for (size_t c = 0; c < board::COL_SIZE; ++c) {
@@ -82,7 +82,7 @@ bool solve_single_value_col(board& b)
                 }
             }
             if (count == 1) {
-                b.set_value(possible_pos, possible_val);
+                b.set_value(possible_pos, possible_val, t);
                 is_found = true;
             }
         }
@@ -90,7 +90,7 @@ bool solve_single_value_col(board& b)
     return is_found;
 }
 
-bool solve_single_value_row(board& b)
+bool solve_single_value_row(board& b, const board::tag_t t)
 {
     bool is_found = false;
     for (size_t r = 0; r < board::ROW_SIZE; ++r) {
@@ -107,7 +107,7 @@ bool solve_single_value_row(board& b)
                 }
             }
             if (count == 1) {
-                b.set_value(possible_pos, possible_val);
+                b.set_value(possible_pos, possible_val, t);
                 is_found = true;
             }
         }
@@ -115,7 +115,7 @@ bool solve_single_value_row(board& b)
     return is_found;
 }
 
-bool solve_single_value_section(board& b)
+bool solve_single_value_section(board& b, const board::tag_t t)
 {
     for (size_t s = 0; s < board::ROW_SIZE; ++s) {
         const size_t start_row = (s / board::GRID_SIZE) * board::GRID_SIZE;
@@ -135,7 +135,7 @@ bool solve_single_value_section(board& b)
                     }
                 }
                 if (count == 1) {
-                    b.set_value(p, possible_val);
+                    b.set_value(p, possible_val, t);
                     return true;
                 }
             }

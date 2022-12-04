@@ -70,7 +70,7 @@ board::grid_t generator::generate()
             continue;
         }
         [[maybe_unused]] const board::value_t orig_val = m_board.value(rand_pos);
-        m_board.set_value(rand_pos, 0);
+        //m_board.set_value(rand_pos, 0);
     }
 
     return m_board.grid();

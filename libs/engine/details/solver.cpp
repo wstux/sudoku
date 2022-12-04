@@ -64,18 +64,18 @@ bool solver::is_solved(const board& brd)
 
 bool solver::solve()
 {
-    return solve(m_solver_board.current_tag());
+    return solve(board::BEGIN_TAG);
 }
 
 bool solver::solve(grid_t board)
 {
     m_solver_board.reset(std::move(board));
-    return solve(m_solver_board.current_tag());
+    return solve();
 }
 
 bool solver::solve(const board::tag_t tag)
 {
-    while (solve_single(m_solver_board)) {}
+    while (solve_single(m_solver_board, tag)) {}
     if (is_solved(m_solver_board)) { return true; }
     if (is_impossible(m_solver_board)) { return false; }
 
@@ -89,6 +89,11 @@ bool solver::solve(const board::tag_t tag)
         return false;
     }
 
+    const board::tag_t guess_tag = tag + 1;
+    assert(guess_tag % 2 == 0);
+    const board::tag_t next_tag = tag + 2;
+    assert(next_tag % 2 == 1);
+
     assert(guess.available.count() > 0);
     for (size_t i = 0; i < guess.available.size(); ++i) {
         if (! guess.available[i]) {
@@ -99,8 +104,8 @@ bool solver::solve(const board::tag_t tag)
         const value_t value = i + 1;
         assert(value > 0 && value < 10);
 
-        m_solver_board.set_value(guess.pos, value);
-        if (is_impossible(m_solver_board) || ! solve(m_solver_board.current_tag())) {
+        m_solver_board.set_value(guess.pos, value, guess_tag);
+        if (is_impossible(m_solver_board) || ! solve(next_tag)) {
             m_solver_board.rollback_to_tag(tag);
         } else {
             return true;
@@ -109,33 +114,13 @@ bool solver::solve(const board::tag_t tag)
     return false;
 }
 
-bool solver::solve_single(board& b)
+bool solver::solve_single(board& b, const board::tag_t t)
 {
-    if (solve_single_cell(b))          { return true; }
-    if (solve_single_value_col(b))     { return true; }
-    if (solve_single_value_row(b))     { return true; }
-    if (solve_single_value_section(b)) { return true; }
+    if (details::solve_single_cell(b, t))          { return true; }
+    if (details::solve_single_value_col(b, t))     { return true; }
+    if (details::solve_single_value_row(b, t))     { return true; }
+    if (details::solve_single_value_section(b, t)) { return true; }
     return false;
-}
-
-bool solver::solve_single_cell(board& b)
-{
-    return details::solve_single_cell(b);
-}
-
-bool solver::solve_single_value_col(board& b)
-{
-    return details::solve_single_value_col(b);
-}
-
-bool solver::solve_single_value_row(board& b)
-{
-    return details::solve_single_value_row(b);
-}
-
-bool solver::solve_single_value_section(board& b)
-{
-    return details::solve_single_value_section(b);
 }
 
 } // namespace engine
