@@ -55,8 +55,6 @@ private:
 
     void mark_impossible(const size_t r, const size_t c, value_t v, const tag_t t);
 
-    void reset_possible(const size_t p, value_t v, const tag_t t);
-
     void set_impossible(const size_t r, const size_t c, value_t v, const tag_t t);
 
     static size_t to_col(const size_t p);

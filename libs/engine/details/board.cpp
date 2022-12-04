@@ -8,16 +8,14 @@
 namespace engine {
 namespace {
 
-struct tag_change_t final
+struct changed_pos_t final
 {
     bool is_valid() const { return (pos != board::BOARD_SIZE);}
 
     size_t pos = board::BOARD_SIZE;
-    board::value_t val;
 };
 
 using changed_fn_t = std::function<board::tag_t(size_t)>;
-using possible_fn_t = std::function<board::tag_t(size_t,board::value_t)>;
 
 template<class TInputIterator, class TUnaryFn>
 inline void for_each_n(TInputIterator it, size_t n, TUnaryFn f)
@@ -35,18 +33,12 @@ inline void set_if(TType& var, const TType& val, TUnaryFn f)
     }
 }
 
-tag_change_t find_change(const changed_fn_t& is_ch_fn, const possible_fn_t& is_poss_fn, const board::tag_t t)
+changed_pos_t find_change(const changed_fn_t& ch_fn, const board::tag_t t)
 {
-    tag_change_t ch;
+    changed_pos_t ch;
     for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
-        if (is_ch_fn(p) == t) {
+        if (ch_fn(p) == t) {
             ch.pos = p;
-            break;
-        }
-    }
-    for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
-        if (is_poss_fn(ch.pos, v) == t) {
-            ch.val = v;
             break;
         }
     }
@@ -119,10 +111,8 @@ void board::mark_impossible(const size_t r, const size_t c, value_t v, const tag
     const size_t start_col = details::grid_start_col(c);
     const size_t start_row = details::grid_start_row(r);
     for (size_t row = start_row; row < start_row + GRID_SIZE; ++row) {
-        poss_row_t& pos_row = m_possible[row];
         for (size_t col = start_col; col < start_col + GRID_SIZE; ++col) {
-            poss_value_t& pos_cell = pos_row[col];
-            set_if(pos_cell[v], t, is_valid_tag);
+            set_if(m_possible[row][col][v], t, is_valid_tag);
         }
     }
 }
@@ -133,36 +123,27 @@ void board::reset(grid_t g)
     init();
 }
 
-void board::reset_possible(const size_t p, value_t v, const tag_t t)
-{
-    m_ch_grid[to_row(p)][to_col(p)] = INVALID_TAG;
-
-    for (poss_row_t& pos_row : m_possible) {
-        for (poss_value_t& pos_cell : pos_row) {
-            set_if(pos_cell[v - 1], INVALID_TAG, [t](tag_t tag) -> bool { return (tag == t); });
-        }
-    }
-}
-
 void board::rollback(const tag_t t)
 {
     if (t < BEGIN_TAG) {
         return;
     }
 
-    const changed_fn_t is_ch_fn = [&](size_t p) -> tag_t {
-        return m_ch_grid[to_row(p)][to_col(p)];
-    };
-    const possible_fn_t is_poss_fn = [&](size_t p, value_t v) -> tag_t {
-        return m_possible[to_row(p)][to_col(p)][v - 1];
-    };
+    for (poss_row_t& pos_row : m_possible) {
+        for (poss_value_t& pos_cell : pos_row) {
+            for (value_t v = BEGIN_VALUE; v < END_VALUE; ++v) {
+                set_if(pos_cell[v - 1], INVALID_TAG, [t](tag_t tag) -> bool { return (tag == t); });
+            }
+        }
+    }
 
-    tag_change_t f_ch = find_change(is_ch_fn, is_poss_fn, t);
+    const changed_fn_t ch_fn = [&](size_t p) -> tag_t { return m_ch_grid[to_row(p)][to_col(p)]; };
+    changed_pos_t f_ch = find_change(ch_fn, t);
     while (f_ch.is_valid()) {
-        reset_possible(f_ch.pos, f_ch.val, t);
+        m_ch_grid[to_row(f_ch.pos)][to_col(f_ch.pos)] = INVALID_TAG;
         m_grid[to_row(f_ch.pos)][to_col(f_ch.pos)] = 0;
 
-        f_ch = find_change(is_ch_fn, is_poss_fn, t);
+        f_ch = find_change(ch_fn, t);
     }
 }
 
