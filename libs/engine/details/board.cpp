@@ -66,8 +66,6 @@ board::board(grid_t g)
 
 void board::init()
 {
-    m_tag = 0;
-
     for (size_t p = 0; p < BOARD_SIZE; ++p) {
         const size_t c = to_col(p);
         const size_t r = to_row(p);
@@ -117,6 +115,18 @@ void board::mark_impossible(const size_t r, const size_t c, value_t v, const tag
     }
 }
 
+board::tag_t board::max_tag() const
+{
+    tag_t max_tag = DEFAULT_TAG;
+    for (size_t r = 0; r < ROW_SIZE; ++r) {
+        for (size_t c = 0; c < COL_SIZE; ++c) {
+            max_tag = std::max(m_ch_grid[r][c], max_tag);
+        }
+    }
+
+    return max_tag;
+}
+
 void board::reset(grid_t g)
 {
     m_grid = std::move(g);
@@ -149,9 +159,10 @@ void board::rollback(const tag_t t)
 
 void board::rollback_to_tag(const tag_t t)
 {
-    while (m_tag > t) {
-        rollback(m_tag);
-        --m_tag;
+    tag_t tag = max_tag();
+    while (tag > t) {
+        rollback(tag);
+        --tag;
     }
 }
 
@@ -170,7 +181,6 @@ bool board::set_value(const size_t p, const value_t v, const tag_t t)
         return false;
     }
 
-    m_tag = std::max(m_tag, t);
     m_grid[r][c] = v;
     set_impossible(r, c, v, t);
     return true;

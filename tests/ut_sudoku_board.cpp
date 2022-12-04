@@ -143,7 +143,7 @@ TEST(sudoku_board, rollback)
     solve_single_value_col(sb);
 
     sb.rollback_to_tag(engine::board::DEFAULT_TAG);
-    //EXPECTED(sb.current_step() == 0);
+    EXPECTED(engine::board::max_tag(sb) == 0);
     EXPECTED(sb.grid() == td)
         << "Etalon: " << std::endl << print(td) << std::endl
         << "Test result: " << std::endl << print(sb.grid()) << std::endl;

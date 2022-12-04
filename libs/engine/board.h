@@ -46,10 +46,14 @@ public:
 
     value_t value(const size_t p) const { return m_grid[to_row(p)][to_col(p)]; }
 
+    static tag_t max_tag(const board& b) { return b.max_tag(); }
+
 private:
     void init();
 
     void mark_impossible(const size_t r, const size_t c, value_t v, const tag_t t);
+
+    tag_t max_tag() const;
 
     void set_impossible(const size_t r, const size_t c, value_t v, const tag_t t);
 
@@ -68,7 +72,6 @@ private:
 private:
     grid_t m_grid;
 
-    tag_t m_tag = 0;
     poss_grid_t m_possible;
     change_grid_t m_ch_grid;
 };
