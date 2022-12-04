@@ -25,6 +25,9 @@ public:
     bool solve(grid_t board);
 
     static bool is_impossible(const board& b);
+
+    static bool is_solve_single_tag(const board::tag_t t) { return (t % 2 == 1); }
+
     static bool is_solved(const grid_t& b);
     static bool is_solved(const board& brd);
 

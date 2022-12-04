@@ -92,7 +92,7 @@ bool solver::solve(const board::tag_t tag)
     const board::tag_t guess_tag = tag + 1;
     assert(guess_tag % 2 == 0);
     const board::tag_t next_tag = tag + 2;
-    assert(next_tag % 2 == 1);
+    assert(is_solve_single_tag(next_tag));
 
     assert(guess.available.count() > 0);
     for (size_t i = 0; i < guess.available.size(); ++i) {
