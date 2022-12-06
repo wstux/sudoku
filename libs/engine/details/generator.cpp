@@ -4,6 +4,7 @@
 #include "engine/board_view.h"
 #include "engine/generator.h"
 #include "engine/solver.h"
+#include "engine/details/checker.h"
 #include "engine/details/utils.h"
 
 namespace engine {
@@ -77,6 +78,7 @@ board::grid_t generator::generate(const difficult /*d*/)
     board_view brd(grid);
     details::shaffle_array(m_rand_board_idx);
 
+    details::checker checker;
     const rotate rand_rotate = randomizer();
     for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
         const size_t pos = random_pos(rotate_position(p, rand_rotate));
@@ -84,8 +86,14 @@ board::grid_t generator::generate(const difficult /*d*/)
         if (! brd.is_set_value(pos)) {
             continue;
         }
-        [[maybe_unused]] const board::value_t orig_val = brd.value(pos);
+        const board::value_t orig_val = brd.value(pos);
         brd.set_value(pos, 0);
+        if (checker.calc_solutions(brd, 2, 0) > 1){
+            brd.set_value(pos, orig_val);
+        }
+//        if (checker.difficulty() > d) {
+//            brd.set_value(pos, orig_val);
+//        }
     }
 
     return brd.grid();
