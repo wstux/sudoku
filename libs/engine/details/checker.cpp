@@ -60,6 +60,51 @@ void checker::add_very_hard_item(const board::tag_t t)
     item.is_very_hard = true;
 }
 
+bool checker::solve_single(board& b, const board::tag_t t)
+{
+    if (solve_single_cell(b, t))          { return true; }
+    if (solve_single_value_col(b, t))     { return true; }
+    if (solve_single_value_row(b, t))     { return true; }
+    if (solve_single_value_section(b, t)) { return true; }
+    return false;
+}
+
+bool checker::solve_single_cell(board& b, const board::tag_t t)
+{
+    if (details::solve_single_cell(b, t)) {
+        add_easy_item(t);
+        return true;
+    }
+    return false;
+}
+
+bool checker::solve_single_value_col(board& b, const board::tag_t t)
+{
+    if (details::solve_single_value_col(b, t)) {
+        add_medium_item(t);
+        return true;
+    }
+    return false;
+}
+
+bool checker::solve_single_value_row(board& b, const board::tag_t t)
+{
+    if (details::solve_single_value_row(b, t)) {
+        add_medium_item(t);
+        return true;
+    }
+    return false;
+}
+
+bool checker::solve_single_value_section(board& b, const board::tag_t t)
+{
+    if (details::solve_single_value_section(b, t)) {
+        add_medium_item(t);
+        return true;
+    }
+    return false;
+}
+
 } // namespace details
 } // namespace engine
 

@@ -14,6 +14,8 @@ private:
     using random_indices_t = std::array<size_t, board::BOARD_SIZE>;
 
 public:
+    using difficult = generator::difficult;
+
     checker();
 
 private:
@@ -34,8 +36,17 @@ private:
     void add_medium_item(const board::tag_t t);
     void add_very_hard_item(const board::tag_t t);
 
+    size_t random_pos(size_t p) const { return m_rand_board_idx[p]; }
+
+    bool solve_single(board& b, const board::tag_t t);
+    bool solve_single_cell(board& b, const board::tag_t t);
+    bool solve_single_value_col(board& b, const board::tag_t t);
+    bool solve_single_value_row(board& b, const board::tag_t t);
+    bool solve_single_value_section(board& b, const board::tag_t t);
+
 private:
     random_indices_t m_rand_board_idx;
+
     std::stack<log_item> m_log;
 };
 
