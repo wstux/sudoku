@@ -84,6 +84,29 @@ checker::difficult checker::difficulty() const
     return difficult::INVALID;
 }
 
+void checker::reset()
+{
+    while (! m_log.empty()) {
+        m_log.pop();
+    }
+    shaffle_array(m_rand_board_idx);
+}
+
+void checker::rollback_to_tag(board& b, const board::tag_t t)
+{
+    b.rollback_to_tag(t);
+    while((! m_log.empty()) && (m_log.top().tag != t)) {
+        m_log.pop();
+    }
+}
+
+void checker::set_guess_value(board& b, const size_t p, const board::value_t v, const board::tag_t t)
+{
+    if (b.set_value(p, v, t)) {
+        add_very_hard_item(t);
+    }
+}
+
 bool checker::solve_single(board& b, const board::tag_t t)
 {
     if (solve_single_cell(b, t))          { return true; }

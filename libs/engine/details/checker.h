@@ -42,6 +42,12 @@ private:
 
     size_t random_pos(size_t p) const { return m_rand_board_idx[p]; }
 
+    void reset();
+
+    void rollback_to_tag(board& b, const board::tag_t t);
+
+    void set_guess_value(board& b, const size_t p, const board::value_t v, const board::tag_t t);
+
     bool solve_single(board& b, const board::tag_t t);
     bool solve_single_cell(board& b, const board::tag_t t);
     bool solve_single_value_col(board& b, const board::tag_t t);
