@@ -4,12 +4,15 @@ LibTarget(sudoku_engine STATIC
         board_view.h
         generator.h
         solver.h
+        details/checker.h
         details/utils.h
     SOURCES
         details/board.cpp
         details/board_view.cpp
+        details/checker.cpp
         details/generator.cpp
         details/solver.cpp
         details/utils.cpp
     INCLUDE_DIR libs
 )
+
