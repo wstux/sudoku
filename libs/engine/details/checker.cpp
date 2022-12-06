@@ -73,29 +73,53 @@ checker::difficult checker::calc_difficulty(const board_view& b)
 checker::difficult checker::calc_difficulty(board b)
 {
     reset();
-    if (solve(b, board::BEGIN_TAG)) {
-        return difficulty();
+    m_dif = difficult::INVALID;
+    const bool is_solved = solve(b, board::BEGIN_TAG);
+    if (is_solved) {
+        if (m_log.empty()) {
+            m_dif = difficult::INVALID;
+        } else {
+            const log_item& item = m_log.top();
+            if (item.is_very_hard) {
+                m_dif = difficult::VERY_HARD;
+            } else if (item.is_hard) {
+                m_dif = difficult::HARD;
+            } else if (item.is_medium) {
+                m_dif = difficult::MEDIUM;
+            } else if (item.is_easy) {
+                m_dif = difficult::EASY;
+            } else {
+                m_dif = difficult::INVALID;
+            }
+        }
     }
-    return difficult::INVALID;
+    return m_dif;
 }
 
-size_t checker::calc_solutions(const board::grid_t& g, const size_t limit)
+size_t checker::calc_solutions(const board::grid_t& g, const size_t limit, size_t attempts)
 {
-    return calc_solutions(board(g), limit);
+    return calc_solutions(board(g), limit, attempts);
 }
 
-size_t checker::calc_solutions(const board_view& b, const size_t limit)
+size_t checker::calc_solutions(const board_view& b, const size_t limit, size_t attempts)
 {
-    return calc_solutions(board(b.grid()), limit);
+    return calc_solutions(board(b.grid()), limit, attempts);
 }
 
-size_t checker::calc_solutions(board b, const size_t limit)
+size_t checker::calc_solutions(board b, const size_t limit, size_t attempts)
 {
-    const board::grid_t g = b.grid();
+    const board::grid_t raw_grid = b.grid();
+
+    reset_solutions();
+    m_solutions_count = calc_solutions(b, board::BEGIN_TAG, limit);
+    while ((m_solutions_count != 1) && (attempts > 0)) {
+        --attempts;
+        m_solutions_count = calc_solutions(b, board::BEGIN_TAG, limit);
+    }
+
+    calc_difficulty(raw_grid);
     reset();
-    const size_t solutions_count = calc_solutions(b, board::BEGIN_TAG, limit);
-    calc_difficulty(g);
-    return solutions_count;
+    return m_solutions_count;
 }
 
 size_t checker::calc_solutions(board& b, const board::tag_t t, const size_t limit)
@@ -153,31 +177,19 @@ std::string checker::difficult_to_str(const difficult d)
     return generator::difficult_to_str(d);
 }
 
-checker::difficult checker::difficulty() const
-{
-    if (m_log.empty()) {
-        return difficult::INVALID;
-    }
-
-    const log_item& item = m_log.top();
-    if (item.is_very_hard) {
-        return difficult::VERY_HARD;
-    } else if (item.is_hard) {
-        return difficult::HARD;
-    } else if (item.is_medium) {
-        return difficult::MEDIUM;
-    } else if (item.is_easy) {
-        return difficult::EASY;
-    }
-    return difficult::INVALID;
-}
-
 void checker::reset()
 {
     while (! m_log.empty()) {
         m_log.pop();
     }
     shaffle_array(m_rand_board_idx);
+}
+
+void checker::reset_solutions()
+{
+    reset();
+    m_dif = difficult::INVALID;
+    m_solutions_count = 0;
 }
 
 void checker::rollback_to_tag(board& b, const board::tag_t t)

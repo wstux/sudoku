@@ -22,11 +22,13 @@ public:
     difficult calc_difficulty(const board_view& b);
     difficult calc_difficulty(board b);
 
-    size_t calc_solutions(const board::grid_t& g, const size_t limit = 2);
-    size_t calc_solutions(const board_view& b, const size_t limit = 2);
-    size_t calc_solutions(board b, const size_t limit = 2);
+    size_t calc_solutions(const board::grid_t& g, const size_t limit = 2, size_t attempts = 10);
+    size_t calc_solutions(const board_view& b, const size_t limit = 2, size_t attempts = 10);
+    size_t calc_solutions(board b, const size_t limit = 2, size_t attempts = 10);
 
-    difficult difficulty() const;
+    difficult difficulty() const { return m_dif; }
+
+    size_t solutions_count() const { return m_solutions_count; }
 
     static std::string difficult_to_str(const difficult d);
 
@@ -53,6 +55,7 @@ private:
     size_t random_pos(size_t p) const { return m_rand_board_idx[p]; }
 
     void reset();
+    void reset_solutions();
 
     void rollback_to_tag(board& b, const board::tag_t t);
 
@@ -68,8 +71,9 @@ private:
 
 private:
     random_indices_t m_rand_board_idx;
-
     std::stack<log_item> m_log;
+    difficult m_dif = difficult::INVALID;
+    size_t m_solutions_count = 0;
 };
 
 } // namespace details
