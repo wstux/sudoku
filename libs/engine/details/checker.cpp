@@ -60,6 +60,30 @@ void checker::add_very_hard_item(const board::tag_t t)
     item.is_very_hard = true;
 }
 
+std::string checker::difficult_to_str(const difficult d)
+{
+    return generator::difficult_to_str(d);
+}
+
+checker::difficult checker::difficulty() const
+{
+    if (m_log.empty()) {
+        return difficult::INVALID;
+    }
+
+    const log_item& item = m_log.top();
+    if (item.is_very_hard) {
+        return difficult::VERY_HARD;
+    } else if (item.is_hard) {
+        return difficult::HARD;
+    } else if (item.is_medium) {
+        return difficult::MEDIUM;
+    } else if (item.is_easy) {
+        return difficult::EASY;
+    }
+    return difficult::INVALID;
+}
+
 bool checker::solve_single(board& b, const board::tag_t t)
 {
     if (solve_single_cell(b, t))          { return true; }

@@ -18,6 +18,10 @@ public:
 
     checker();
 
+    difficult difficulty() const;
+
+    static std::string difficult_to_str(const difficult d);
+
 private:
     struct log_item
     {
