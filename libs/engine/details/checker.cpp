@@ -60,6 +60,94 @@ void checker::add_very_hard_item(const board::tag_t t)
     item.is_very_hard = true;
 }
 
+checker::difficult checker::calc_difficulty(const board::grid_t& g)
+{
+    return calc_difficulty(board(g));
+}
+
+checker::difficult checker::calc_difficulty(const board_view& b)
+{
+    return calc_difficulty(board(b.grid()));
+}
+
+checker::difficult checker::calc_difficulty(board b)
+{
+    reset();
+    if (solve(b, board::BEGIN_TAG)) {
+        return difficulty();
+    }
+    return difficult::INVALID;
+}
+
+size_t checker::calc_solutions(const board::grid_t& g, const size_t limit)
+{
+    return calc_solutions(board(g), limit);
+}
+
+size_t checker::calc_solutions(const board_view& b, const size_t limit)
+{
+    return calc_solutions(board(b.grid()), limit);
+}
+
+size_t checker::calc_solutions(board b, const size_t limit)
+{
+    const board::grid_t g = b.grid();
+    reset();
+    const size_t solutions_count = calc_solutions(b, board::BEGIN_TAG, limit);
+    calc_difficulty(g);
+    return solutions_count;
+}
+
+size_t checker::calc_solutions(board& b, const board::tag_t t, const size_t limit)
+{
+    const board::tag_t single_tag = t + 1;
+    while (solve_single(b, single_tag)) {
+		if (solver::is_solved(b)) {
+			rollback_to_tag(b, t);
+			return 1;
+		}
+		if (solver::is_impossible(b)) {
+			rollback_to_tag(b, t);
+			return 0;
+		}
+	}
+
+	size_t solutions_count = 0;
+	const board::tag_t guess_tag = single_tag + 1;
+
+	const details::is_set_fn_t is_set_fn =
+	    [b](size_t p) -> bool { return b.is_set_value(p); };
+    const details::is_poss_fn_t is_poss_fn =
+        [b](size_t p, board::value_t v) -> bool { return b.is_possible(p, v); };
+
+    details::guess_t guess = details::find_guess_cell(is_set_fn, is_poss_fn, m_rand_board_idx);
+    if (! guess.is_valid()) {
+        rollback_to_tag(b, t);
+        return solutions_count;
+    }
+
+    assert(guess.available.count() > 0);
+    for (size_t i = 0; i < guess.available.size(); ++i) {
+        if (! guess.available[i]) {
+            continue;
+        }
+        assert(guess.available[i]);
+
+        const board::value_t value = i + 1;
+        assert(value > 0 && value < 10);
+
+        set_guess_value(b, guess.pos, value, guess_tag);
+        solutions_count += calc_solutions(b, t, limit);
+        if (solutions_count >= limit) {
+            rollback_to_tag(b, t);
+            return solutions_count;
+        }
+    }
+
+    rollback_to_tag(b, t);
+    return solutions_count;
+}
+
 std::string checker::difficult_to_str(const difficult d)
 {
     return generator::difficult_to_str(d);
@@ -105,6 +193,52 @@ void checker::set_guess_value(board& b, const size_t p, const board::value_t v, 
     if (b.set_value(p, v, t)) {
         add_very_hard_item(t);
     }
+}
+
+bool checker::solve(board& b, const board::tag_t t)
+{
+    const board::tag_t single_tag = t + 1;
+    while (solve_single(b, single_tag)) {
+		if (solver::is_solved(b)) {
+			return true;
+		}
+		if (solver::is_impossible(b)) {
+			return false;
+		}
+	}
+
+	const board::tag_t guess_tag = single_tag + 1;
+
+	const details::is_set_fn_t is_set_fn =
+	    [b](size_t p) -> bool { return b.is_set_value(p); };
+    const details::is_poss_fn_t is_poss_fn =
+        [b](size_t p, board::value_t v) -> bool { return b.is_possible(p, v); };
+
+    details::guess_t guess = details::find_guess_cell(is_set_fn, is_poss_fn, m_rand_board_idx);
+    if (! guess.is_valid()) {
+        rollback_to_tag(b, t);
+        return false;
+    }
+
+    assert(guess.available.count() > 0);
+    for (size_t i = 0; i < guess.available.size(); ++i) {
+        if (! guess.available[i]) {
+            continue;
+        }
+        assert(guess.available[i]);
+
+        const board::value_t value = i + 1;
+        assert(value > 0 && value < 10);
+
+        set_guess_value(b, guess.pos, value, guess_tag);
+        if (solver::is_impossible(b) || ! solve(b, guess_tag)) {
+            rollback_to_tag(b, t);
+        } else {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool checker::solve_single(board& b, const board::tag_t t)

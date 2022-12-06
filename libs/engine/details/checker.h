@@ -18,6 +18,14 @@ public:
 
     checker();
 
+    difficult calc_difficulty(const board::grid_t& g);
+    difficult calc_difficulty(const board_view& b);
+    difficult calc_difficulty(board b);
+
+    size_t calc_solutions(const board::grid_t& g, const size_t limit = 2);
+    size_t calc_solutions(const board_view& b, const size_t limit = 2);
+    size_t calc_solutions(board b, const size_t limit = 2);
+
     difficult difficulty() const;
 
     static std::string difficult_to_str(const difficult d);
@@ -40,6 +48,8 @@ private:
     void add_medium_item(const board::tag_t t);
     void add_very_hard_item(const board::tag_t t);
 
+    size_t calc_solutions(board& b, const board::tag_t t, const size_t limit);
+
     size_t random_pos(size_t p) const { return m_rand_board_idx[p]; }
 
     void reset();
@@ -47,6 +57,8 @@ private:
     void rollback_to_tag(board& b, const board::tag_t t);
 
     void set_guess_value(board& b, const size_t p, const board::value_t v, const board::tag_t t);
+
+    bool solve(board& b, const board::tag_t t);
 
     bool solve_single(board& b, const board::tag_t t);
     bool solve_single_cell(board& b, const board::tag_t t);
