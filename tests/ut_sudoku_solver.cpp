@@ -151,7 +151,7 @@ TEST(sudoku_solver, guess_case_2)
                             << "Test result: " << std::endl << print(res) << std::endl;
 }
 
-TEST(sudoku_solver, guess_case_3)
+TEST(sudoku_solver, guess_case_repeat)
 {
     const engine::board::grid_t td = {
         {{0, 8, 0, 0, 0, 0, 0, 2, 0},

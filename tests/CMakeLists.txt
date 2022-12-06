@@ -5,6 +5,13 @@ TestTarget(ut_sudoku_board
         sudoku_engine
 )
 
+TestTarget(ut_sudoku_checker
+    SOURCES
+        ut_sudoku_checker.cpp
+    LIBRARIES
+        sudoku_engine
+)
+
 TestTarget(ut_sudoku_solver
     SOURCES
         ut_sudoku_solver.cpp
