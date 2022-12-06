@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <string>
 
 #include "engine/board.h"
 
@@ -12,19 +13,29 @@ private:
     using random_indices_t = std::array<size_t, board::BOARD_SIZE>;
 
 public:
+    enum class difficult
+    {
+        EASY,
+        MEDIUM,
+        HARD,
+        VERY_HARD,
+        INVALID
+    };
+
     generator();
 
-    board::grid_t generate();
+    board::grid_t generate(const difficult d);
+
+    static std::string difficult_to_str(const difficult d);
+
+    static board::grid_t generate_grid();
 
 private:
-    void generate_board();
-
     void init();
 
     size_t random_pos(size_t p) const { return m_rand_board_idx[p]; }
 
 private:
-    board m_board;
     random_indices_t m_rand_board_idx;
 };
 

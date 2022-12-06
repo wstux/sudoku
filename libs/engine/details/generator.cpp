@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "engine/board_view.h"
 #include "engine/generator.h"
 #include "engine/solver.h"
 #include "engine/details/utils.h"
@@ -56,34 +57,49 @@ generator::generator()
     init();
 }
 
-board::grid_t generator::generate()
+std::string generator::difficult_to_str(const difficult d)
 {
-    generate_board();
+    if (d == difficult::EASY) {
+        return "EASY";
+    } else if (d == difficult::MEDIUM) {
+        return "MEDIUM";
+    } else if (d == difficult::HARD) {
+        return "HARD";
+    } else if (d == difficult::VERY_HARD) {
+        return "VERY_HARD";
+    }
+    return "INVALID";
+}
+
+board::grid_t generator::generate(const difficult /*d*/)
+{
+    board::grid_t grid = generate_grid();
+    board_view brd(grid);
     details::shaffle_array(m_rand_board_idx);
 
     const rotate rand_rotate = randomizer();
     for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
-        details::shaffle_array(m_rand_board_idx);
-        const size_t rand_pos = random_pos(rotate_position(p, rand_rotate));
+        const size_t pos = random_pos(rotate_position(p, rand_rotate));
 
-        if (! m_board.is_set_value(rand_pos)) {
+        if (! brd.is_set_value(pos)) {
             continue;
         }
-        [[maybe_unused]] const board::value_t orig_val = m_board.value(rand_pos);
-        //m_board.set_value(rand_pos, 0);
+        [[maybe_unused]] const board::value_t orig_val = brd.value(pos);
+        brd.set_value(pos, 0);
     }
 
-    return m_board.grid();
+    return brd.grid();
 }
 
-void generator::generate_board()
+board::grid_t generator::generate_grid()
 {
     solver sl;
     [[maybe_unused]] const bool is_solved = sl.solve();
     assert(is_solved);
 
-    m_board = sl.get_board();
-    assert(solver::is_solved(m_board));
+    const board brd = sl.get_board();
+    assert(solver::is_solved(brd));
+    return brd.grid();
 }
 
 void generator::init()
