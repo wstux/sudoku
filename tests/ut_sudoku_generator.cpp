@@ -16,7 +16,7 @@ engine::board::grid_t generate(engine::generator& gen, const engine::generator::
     engine::board::grid_t g;
     while ((gen.difficulty() != dif) && (attempts > 0)) {
         --attempts;
-        g = gen.generate(dif);
+        g = gen.generate();
     }
     return g;
 }

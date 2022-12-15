@@ -60,17 +60,51 @@ void checker::add_very_hard_item(const board::tag_t t)
     item.is_very_hard = true;
 }
 
+void checker::calc(const board::grid_t& g, const size_t limit)
+{
+    reset_solutions();
+
+    board b(g);
+    calculate_solutions(b, limit);
+    calculate_difficulty(b);
+}
+
+void checker::calc(const board_view& b, const size_t limit)
+{
+    reset_solutions();
+
+    board brd(b.grid());
+    calculate_solutions(brd, limit);
+    calculate_difficulty(brd);
+}
+
+void checker::calc(const board& b, const size_t limit)
+{
+    reset_solutions();
+
+    calculate_solutions(b, limit);
+    calculate_difficulty(b);
+}
+
 checker::difficult checker::calc_difficulty(const board::grid_t& g)
 {
-    return calc_difficulty(board(g));
+    checker ch;
+    return ch.calculate_difficulty(board(g));
 }
 
 checker::difficult checker::calc_difficulty(const board_view& b)
 {
-    return calc_difficulty(board(b.grid()));
+    checker ch;
+    return ch.calculate_difficulty(board(b.grid()));
 }
 
-checker::difficult checker::calc_difficulty(board b)
+checker::difficult checker::calc_difficulty(const board& b)
+{
+    checker ch;
+    return ch.calculate_difficulty(b);
+}
+
+checker::difficult checker::calculate_difficulty(board b)
 {
     reset();
     m_dif = difficult::INVALID;
@@ -93,44 +127,38 @@ checker::difficult checker::calc_difficulty(board b)
             }
         }
     }
+
+    reset();
     return m_dif;
-}
-
-checker::difficult checker::calculate_difficulty(const board::grid_t& g)
-{
-    checker ch;
-    return ch.calc_difficulty(g);
-}
-
-checker::difficult checker::calculate_difficulty(const board& b)
-{
-    checker ch;
-    return ch.calc_difficulty(b);
 }
 
 size_t checker::calc_solutions(const board::grid_t& g, const size_t limit)
 {
-    return calc_solutions(board(g), limit);
+    checker ch;
+    return ch.calculate_solutions(board(g), limit);
 }
 
 size_t checker::calc_solutions(const board_view& b, const size_t limit)
 {
-    return calc_solutions(board(b.grid()), limit);
+    checker ch;
+    return ch.calculate_solutions(board(b.grid()), limit);
 }
 
 size_t checker::calc_solutions(board b, const size_t limit)
 {
-    //const board::grid_t raw_grid = b.grid();
+    checker ch;
+    return ch.calculate_solutions(b, limit);
+}
 
-    reset_solutions();
-    m_solutions_count = calc_solutions(b, board::BEGIN_TAG, limit);
-
-    //calc_difficulty(raw_grid);
+size_t checker::calculate_solutions(board b, const size_t limit)
+{
+    reset();
+    m_solutions_count = calculate_solutions(b, board::BEGIN_TAG, limit);
     reset();
     return m_solutions_count;
 }
 
-size_t checker::calc_solutions(board& b, const board::tag_t t, const size_t limit)
+size_t checker::calculate_solutions(board& b, const board::tag_t t, const size_t limit)
 {
     const board::tag_t single_tag = t + 1;
     while (solve_single(b, single_tag)) {
@@ -163,7 +191,7 @@ size_t checker::calc_solutions(board& b, const board::tag_t t, const size_t limi
         assert(value > 0 && value < 10);
 
         set_guess_value(b, guess.pos, value, guess_tag);
-        solutions_count += calc_solutions(b, guess_tag, limit);
+        solutions_count += calculate_solutions(b, guess_tag, limit);
         if (solutions_count >= limit) {
             rollback_to_tag(b, t);
             return solutions_count;

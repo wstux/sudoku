@@ -18,20 +18,21 @@ public:
 
     checker();
 
-    difficult calc_difficulty(const board::grid_t& g);
-    difficult calc_difficulty(const board_view& b);
-    difficult calc_difficulty(board b);
-
-    size_t calc_solutions(const board::grid_t& g, const size_t limit = 2);
-    size_t calc_solutions(const board_view& b, const size_t limit = 2);
-    size_t calc_solutions(board b, const size_t limit = 2);
+    void calc(const board::grid_t& g, const size_t limit = 2);
+    void calc(const board_view& b, const size_t limit = 2);
+    void calc(const board& b, const size_t limit = 2);
 
     difficult difficulty() const { return m_dif; }
 
     size_t solutions_count() const { return m_solutions_count; }
 
-    static difficult calculate_difficulty(const board::grid_t& g);
-    static difficult calculate_difficulty(const board& b);
+    static difficult calc_difficulty(const board::grid_t& g);
+    static difficult calc_difficulty(const board_view& b);
+    static difficult calc_difficulty(const board& b);
+
+    static size_t calc_solutions(const board::grid_t& g, const size_t limit = 2);
+    static size_t calc_solutions(const board_view& b, const size_t limit = 2);
+    static size_t calc_solutions(board b, const size_t limit = 2);
 
     static std::string difficult_to_str(const difficult d);
 
@@ -53,7 +54,11 @@ private:
     void add_medium_item(const board::tag_t t);
     void add_very_hard_item(const board::tag_t t);
 
-    size_t calc_solutions(board& b, const board::tag_t t, const size_t limit);
+    difficult calculate_difficulty(board b);
+
+    size_t calculate_solutions(board b, const size_t limit);
+
+    size_t calculate_solutions(board& b, const board::tag_t t, const size_t limit);
 
     size_t random_pos(size_t p) const { return m_rand_board_idx[p]; }
 

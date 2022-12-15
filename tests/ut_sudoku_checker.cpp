@@ -16,7 +16,8 @@ size_t calc_solutions(engine::details::checker& checker, const engine::board::gr
     size_t solutions_count = 0;
     while ((solutions_count != 1) && (attempts > 0)) {
         --attempts;
-        solutions_count = checker.calc_solutions(td);
+        checker.calc(td);
+        solutions_count = checker.solutions_count();
     }
     return solutions_count;
 }
@@ -41,7 +42,7 @@ TEST(sudoku_checker, easy)
 
     EXPECTED(calc_solutions(checker, td) == 1)
         << "solutions_count: " << checker.solutions_count() << std::endl;
-    EXPECTED(checker.calc_difficulty(td) == engine::details::checker::difficult::EASY)
+    EXPECTED(checker.difficulty() == engine::details::checker::difficult::EASY)
         << engine::details::checker::difficult_to_str(checker.difficulty()) << std::endl;
 }
 
@@ -63,7 +64,7 @@ TEST(sudoku_checker, medium)
 
     EXPECTED(calc_solutions(checker, td) == 1)
         << "solutions_count: " << checker.solutions_count() << std::endl;
-    EXPECTED(checker.calc_difficulty(td) == engine::details::checker::difficult::MEDIUM)
+    EXPECTED(checker.difficulty() == engine::details::checker::difficult::MEDIUM)
         << engine::details::checker::difficult_to_str(checker.difficulty()) << std::endl;
 }
 
@@ -85,7 +86,7 @@ TEST(sudoku_checker, very_hard)
 
     EXPECTED(calc_solutions(checker, td) == 1)
         << "solutions_count: " << checker.solutions_count() << std::endl;
-    EXPECTED(checker.calc_difficulty(td) == engine::details::checker::difficult::VERY_HARD)
+    EXPECTED(checker.difficulty() == engine::details::checker::difficult::VERY_HARD)
         << engine::details::checker::difficult_to_str(checker.difficulty()) << std::endl;
 }
 
@@ -107,7 +108,7 @@ TEST(sudoku_checker, very_hard_repeat)
     for (size_t i = 0; i < std::numeric_limits<char>::max(); ++i) {
         EXPECTED(calc_solutions(checker, td) == 1)
             << "solutions_count: " << checker.solutions_count() << std::endl;
-        EXPECTED(checker.calc_difficulty(td) == engine::details::checker::difficult::VERY_HARD)
+        EXPECTED(checker.difficulty() == engine::details::checker::difficult::VERY_HARD)
             << engine::details::checker::difficult_to_str(checker.difficulty()) << std::endl;
     }
 }

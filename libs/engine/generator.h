@@ -30,7 +30,7 @@ public:
 
     std::string difficulty_str() const { return difficult_to_str(difficulty()); }
 
-    board::grid_t generate(const difficult d);
+    board::grid_t generate();
 
     size_t solutions_count() const { return m_solutions_count; }
 

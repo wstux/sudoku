@@ -72,7 +72,7 @@ std::string generator::difficult_to_str(const difficult d)
     return "INVALID";
 }
 
-board::grid_t generator::generate(const difficult /*d*/)
+board::grid_t generator::generate()
 {
     m_dif = difficult::INVALID;
     m_solutions_count = 0;
@@ -84,7 +84,6 @@ board::grid_t generator::generate(const difficult /*d*/)
     const rotate rand_rotate = randomizer();
     details::shaffle_array(m_rand_board_idx);
 
-    details::checker checker;
     for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
         const size_t pos = random_pos(rotate_position(p, rand_rotate));
 
@@ -93,16 +92,14 @@ board::grid_t generator::generate(const difficult /*d*/)
         }
         const board::value_t orig_val = brd.value(pos);
         brd.set_value(pos, 0);
-        const size_t sol_count = checker.calc_solutions(brd, 2);
-        //const difficult dif = checker.difficulty();
-        if ((sol_count != 1) /*&& (dif > d)*/) {
+        const size_t sol_count = details::checker::calc_solutions(brd, 2);
+        if (sol_count != 1) {
             brd.set_value(pos, orig_val);
         } else {
-            //m_dif = dif;
             m_solutions_count = sol_count;
         }
     }
-    m_dif = checker.calc_difficulty(brd);
+    m_dif = details::checker::calc_difficulty(brd);
 
     return brd.grid();
 }
