@@ -96,28 +96,36 @@ checker::difficult checker::calc_difficulty(board b)
     return m_dif;
 }
 
-size_t checker::calc_solutions(const board::grid_t& g, const size_t limit, size_t attempts)
+checker::difficult checker::calculate_difficulty(const board::grid_t& g)
 {
-    return calc_solutions(board(g), limit, attempts);
+    checker ch;
+    return ch.calc_difficulty(g);
 }
 
-size_t checker::calc_solutions(const board_view& b, const size_t limit, size_t attempts)
+checker::difficult checker::calculate_difficulty(const board& b)
 {
-    return calc_solutions(board(b.grid()), limit, attempts);
+    checker ch;
+    return ch.calc_difficulty(b);
 }
 
-size_t checker::calc_solutions(board b, const size_t limit, size_t attempts)
+size_t checker::calc_solutions(const board::grid_t& g, const size_t limit)
 {
-    const board::grid_t raw_grid = b.grid();
+    return calc_solutions(board(g), limit);
+}
+
+size_t checker::calc_solutions(const board_view& b, const size_t limit)
+{
+    return calc_solutions(board(b.grid()), limit);
+}
+
+size_t checker::calc_solutions(board b, const size_t limit)
+{
+    //const board::grid_t raw_grid = b.grid();
 
     reset_solutions();
     m_solutions_count = calc_solutions(b, board::BEGIN_TAG, limit);
-    while ((m_solutions_count != 1) && (attempts > 0)) {
-        --attempts;
-        m_solutions_count = calc_solutions(b, board::BEGIN_TAG, limit);
-    }
 
-    calc_difficulty(raw_grid);
+    //calc_difficulty(raw_grid);
     reset();
     return m_solutions_count;
 }
@@ -145,12 +153,6 @@ size_t checker::calc_solutions(board& b, const board::tag_t t, const size_t limi
         [b](size_t p, board::value_t v) -> bool { return b.is_possible(p, v); };
 
     details::guess_t guess = details::find_guess_cell(is_set_fn, is_poss_fn, m_rand_board_idx);
-    if (! guess.is_valid()) {
-        rollback_to_tag(b, t);
-        return solutions_count;
-    }
-
-    assert(guess.available.count() > 0);
     for (size_t i = 0; i < guess.available.size(); ++i) {
         if (! guess.available[i]) {
             continue;
@@ -161,10 +163,12 @@ size_t checker::calc_solutions(board& b, const board::tag_t t, const size_t limi
         assert(value > 0 && value < 10);
 
         set_guess_value(b, guess.pos, value, guess_tag);
-        solutions_count += calc_solutions(b, t, limit);
+        solutions_count += calc_solutions(b, guess_tag, limit);
         if (solutions_count >= limit) {
             rollback_to_tag(b, t);
             return solutions_count;
+        } else {
+            rollback_to_tag(b, single_tag);
         }
     }
 

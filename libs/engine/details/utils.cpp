@@ -24,7 +24,7 @@ guess_t find_guess_cell(const is_set_fn_t& is_set_fn, const is_poss_fn_t& is_pos
                     available[v - 1] = true;
                 }
             }
-            if ((available.count() > 0) && (guess.available.count() > available.count())) {
+            if ((available.count() > 0) && (guess.available.count() >= available.count())) {
                 guess.available = available;
                 guess.pos = pos;
             }

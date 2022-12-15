@@ -12,6 +12,13 @@ TestTarget(ut_sudoku_checker
         sudoku_engine
 )
 
+TestTarget(ut_sudoku_generator
+    SOURCES
+        ut_sudoku_generator.cpp
+    LIBRARIES
+        sudoku_engine
+)
+
 TestTarget(ut_sudoku_solver
     SOURCES
         ut_sudoku_solver.cpp

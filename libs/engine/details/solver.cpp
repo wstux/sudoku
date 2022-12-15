@@ -24,6 +24,12 @@ solver::solver(grid_t board)
     details::shaffle_array(m_rand_board_idx);
 }
 
+bool solver::can_solve(const grid_t& g)
+{
+    solver sl;
+    return sl.solve(g);
+}
+
 bool solver::is_impossible(const board& b)
 {
     for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
@@ -42,16 +48,16 @@ bool solver::is_impossible(const board& b)
     return false;
 }
 
-bool solver::is_solved(const grid_t& b)
+bool solver::is_solved(const grid_t& g)
 {
     for (size_t p = 0; p < board::BOARD_SIZE; ++p) {
         const size_t c = details::col_by_position(p);
         const size_t r = details::row_by_position(p);
 
-        if (b[r][c] == 0) { return false; }
-        if (! details::is_unique_in_row(b, r, b[r][c]))     { return false; }
-        if (! details::is_unique_in_col(b, r, b[r][c]))     { return false; }
-        if (! details::is_unique_in_grid(b, r, c, b[r][c])) { return false; }
+        if (g[r][c] == 0) { return false; }
+        if (! details::is_unique_in_row(g, r, g[r][c]))     { return false; }
+        if (! details::is_unique_in_col(g, r, g[r][c]))     { return false; }
+        if (! details::is_unique_in_grid(g, r, c, g[r][c])) { return false; }
     }
     return true;
 }
@@ -67,9 +73,9 @@ bool solver::solve()
     return solve(board::BEGIN_TAG);
 }
 
-bool solver::solve(grid_t board)
+bool solver::solve(grid_t grid)
 {
-    m_solver_board.reset(std::move(board));
+    m_solver_board.reset(std::move(grid));
     return solve();
 }
 

@@ -22,13 +22,16 @@ public:
     difficult calc_difficulty(const board_view& b);
     difficult calc_difficulty(board b);
 
-    size_t calc_solutions(const board::grid_t& g, const size_t limit = 2, size_t attempts = 10);
-    size_t calc_solutions(const board_view& b, const size_t limit = 2, size_t attempts = 10);
-    size_t calc_solutions(board b, const size_t limit = 2, size_t attempts = 10);
+    size_t calc_solutions(const board::grid_t& g, const size_t limit = 2);
+    size_t calc_solutions(const board_view& b, const size_t limit = 2);
+    size_t calc_solutions(board b, const size_t limit = 2);
 
     difficult difficulty() const { return m_dif; }
 
     size_t solutions_count() const { return m_solutions_count; }
+
+    static difficult calculate_difficulty(const board::grid_t& g);
+    static difficult calculate_difficulty(const board& b);
 
     static std::string difficult_to_str(const difficult d);
 

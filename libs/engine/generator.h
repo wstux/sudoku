@@ -13,6 +13,8 @@ private:
     using random_indices_t = std::array<size_t, board::BOARD_SIZE>;
 
 public:
+    static constexpr size_t ATTEMPTS_COUNT = 255;
+
     enum class difficult
     {
         EASY,
@@ -24,7 +26,13 @@ public:
 
     generator();
 
+    difficult difficulty() const { return m_dif; }
+
+    std::string difficulty_str() const { return difficult_to_str(difficulty()); }
+
     board::grid_t generate(const difficult d);
+
+    size_t solutions_count() const { return m_solutions_count; }
 
     static std::string difficult_to_str(const difficult d);
 
@@ -37,6 +45,9 @@ private:
 
 private:
     random_indices_t m_rand_board_idx;
+
+    difficult m_dif = difficult::INVALID;
+    size_t m_solutions_count = 0;
 };
 
 } // namespace engine
