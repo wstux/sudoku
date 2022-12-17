@@ -195,8 +195,6 @@ size_t checker::calculate_solutions(board& b, const board::tag_t t, const size_t
         if (solutions_count >= limit) {
             rollback_to_tag(b, t);
             return solutions_count;
-        } else {
-            rollback_to_tag(b, single_tag);
         }
     }
 

@@ -51,8 +51,6 @@ public:
 private:
     void init();
 
-    void mark_impossible(const size_t r, const size_t c, value_t v, const tag_t t);
-
     tag_t max_tag() const;
 
     void set_impossible(const size_t r, const size_t c, value_t v, const tag_t t);
