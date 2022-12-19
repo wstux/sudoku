@@ -37,6 +37,11 @@ bool is_set_value(const engine::board& b, const size_t r, const size_t c)
     return b.is_set_value(engine::details::to_position(r, c));
 }
 
+bool mark_hidden_pairs_col(engine::board& b)
+{
+    return engine::details::mark_hidden_pairs_col(b, engine::board::BEGIN_TAG);
+}
+
 bool mark_hidden_pairs_row(engine::board& b)
 {
     return engine::details::mark_hidden_pairs_row(b, engine::board::BEGIN_TAG);
@@ -106,6 +111,43 @@ TEST(sudoku_utils, row_by_position)
                 << "position " << pos << " not equal " << i << " row" << std::endl;
         }
     }
+}
+
+TEST(sudoku_utils, mark_hidden_pairs_col)
+{
+    using is_possible_fn_t = const std::function<bool(const engine::board&,size_t,size_t,engine::board::value_t)>;
+
+    const engine::board::grid_t td = {
+        {{2, 0, 0, 1, 6, 5, 9, 3, 8},
+         {1, 6, 8, 9, 3, 4, 7, 0, 0},
+         {9, 5, 3, 8, 2, 7, 0, 0, 1},
+         {5, 1, 6, 3, 0, 0, 0, 0, 0},
+         {0, 9, 2, 7, 0, 6, 8, 0, 0},
+         {0, 8, 0, 5, 0, 2, 0, 9, 6},
+         {0, 0, 9, 2, 0, 0, 5, 0, 0},
+         {0, 0, 1, 4, 5, 3, 0, 8, 9},
+         {8, 0, 5, 6, 0, 0, 0, 0, 4}}
+    };
+
+    const is_possible_fn_t is_possible_fn =
+        [](const engine::board& b, size_t r, size_t c, engine::board::value_t v) -> bool {
+            return b.is_possible(engine::details::to_position(r, c), v);
+        };
+
+    engine::board sb(td);
+    EXPECTED(is_possible_fn(sb, 5, 6, 1));
+    EXPECTED(is_possible_fn(sb, 5, 6, 3));
+    EXPECTED(is_possible_fn(sb, 8, 6, 1));
+    EXPECTED(is_possible_fn(sb, 8, 6, 2));
+    EXPECTED(is_possible_fn(sb, 8, 6, 3));
+
+    mark_hidden_pairs_col(sb);
+
+    EXPECTED(is_possible_fn(sb, 5, 6, 1));
+    EXPECTED(is_possible_fn(sb, 5, 6, 3));
+    EXPECTED(is_possible_fn(sb, 8, 6, 1));
+    EXPECTED(is_possible_fn(sb, 8, 6, 3));
+    EXPECTED(! is_possible_fn(sb, 8, 6, 2));
 }
 
 TEST(sudoku_utils, mark_hidden_pairs_row)

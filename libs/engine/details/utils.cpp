@@ -43,6 +43,67 @@ void init_random()
     }
 }
 
+bool mark_hidden_pairs_col(board& b, const board::tag_t t)
+{
+    using has_two_poss_fn_t = std::function<bool(size_t,size_t&,size_t&, board::value_t)>;
+
+    const has_two_poss_fn_t has_poss_fn = [&b](size_t c, size_t& r1, size_t& r2,
+                                               board::value_t v) -> bool {
+        size_t count = 0;
+        for (size_t r = 0; r < board::ROW_SIZE; ++r) {
+            if (b.is_possible(to_position(r, c), v)) {
+                if (r1 == board::ROW_SIZE) {
+                    r1 = r;
+                } else if (r2 == board::ROW_SIZE) {
+                    r2 = r;
+                }
+                ++count;
+            }
+        }
+        return (count == 2);
+    };
+
+    bool is_found = false;
+    for (size_t c = 0; c < board::COL_SIZE; ++c) {
+        for (board::value_t v1 = board::BEGIN_VALUE; v1 < board::END_VALUE; ++v1) {
+            size_t r1 = board::ROW_SIZE;
+            size_t r2 = board::ROW_SIZE;
+            if (! has_poss_fn(c, r1, r2, v1)) {
+                continue;
+            }
+
+            for (board::value_t v2 = v1 + 1; v2 < board::END_VALUE; ++v2) {
+                size_t r3 = board::ROW_SIZE;
+                size_t r4 = board::ROW_SIZE;
+                if (! has_poss_fn(c, r3, r4, v2)) {
+                    continue;
+                }
+                if ((r1 != r3) || (r2 != r4)) {
+                    continue;
+                }
+
+                for (board::value_t v3 = board::BEGIN_VALUE; v3 < board::END_VALUE; ++v3) {
+                    if ((v3 == v1) || (v3 == v2)) {
+                        continue;
+                    }
+
+                    const size_t p1 = to_position(r1, c);
+                    if (b.is_possible(p1, v3)) {
+                        b.set_impossible(p1, v3, t);
+                        is_found = true;
+                    }
+                    const size_t p2 = to_position(r2, c);
+                    if (b.is_possible(p2, v3)) {
+                        b.set_impossible(p2, v3, t);
+                        is_found = true;
+                    }
+                }
+            }
+        }
+    }
+    return is_found;
+}
+
 bool mark_hidden_pairs_row(board& b, const board::tag_t t)
 {
     using has_two_poss_fn_t = std::function<bool(size_t,size_t&,size_t&, board::value_t)>;
