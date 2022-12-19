@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <ctime>
+
 #include "engine/details/utils.h"
 
 namespace engine {
@@ -40,6 +41,99 @@ void init_random()
         is_once = false;
         std::srand(std::time(nullptr));
     }
+}
+
+bool mark_naked_pairs(board& b, const board::tag_t t)
+{
+    using has_two_possibles_fn_t = std::function<bool(size_t)>;
+    using mark_pair_fn_t = std::function<bool(size_t,size_t,size_t)>;
+    using pos_to_grid_start_fn_t = std::function<size_t(size_t)>;
+
+    const std::function<bool(size_t,size_t)> are_same_fn =
+        [&b](size_t p1, size_t p2) -> bool {
+            for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
+                if (b.is_possible(p1, v) != b.is_possible(p2, v)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    const has_two_possibles_fn_t has_two_possibles_fn = [&b](size_t p) -> bool {
+        size_t count = 0;
+        for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
+            if (b.is_possible(p, v)) {
+                ++count;
+            }
+        }
+        return (count == 2);
+    };
+    const mark_pair_fn_t mark_pair_fn = [&b, t](size_t p1, size_t p2, size_t p3) -> bool {
+        if (p3 == p1) { return false; }
+        if (p3 == p2) { return false; }
+
+        bool is_found = false;
+        for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
+            if (b.is_possible(p1, v) && b.is_possible(p3, v)) {
+                is_found = b.set_impossible(p3, v, t);
+            }
+        }
+        return is_found;
+    };
+    const pos_to_grid_start_fn_t start_col_fn = [](size_t p) -> size_t {
+        return grid_start_col(col_by_position(p));
+    };
+    const pos_to_grid_start_fn_t start_row_fn = [](size_t p) -> size_t {
+        return grid_start_row(row_by_position(p));
+    };
+
+    bool is_found = false;
+    for (size_t p1 = 0; p1 < board::BOARD_SIZE; ++p1) {
+        if (! has_two_possibles_fn(p1)) {
+            continue;
+        }
+
+        const size_t c1 = col_by_position(p1);
+        const size_t r1 = row_by_position(p1);
+        const size_t st_c1 = grid_start_col(c1);
+        const size_t st_r1 = grid_start_row(r1);
+        assert(st_c1 == start_col_fn(p1));
+        assert(st_r1 == start_row_fn(p1));
+        for (size_t p2 = p1; p2 < board::BOARD_SIZE; ++p2) {
+            if (p1 == p2) {
+                continue;
+            }
+            if (! has_two_possibles_fn(p2)) {
+                continue;
+            }
+            if (! are_same_fn(p1, p2)) {
+                continue;
+            }
+
+            // Check rows.
+            if (r1 == row_by_position(p2)) {
+                for (size_t c2 = 0; c2 < board::COL_SIZE; ++c2) {
+                    if (mark_pair_fn(p1, p2, to_position(r1, c2))) {
+                        is_found = true;
+                    }
+                }
+            }
+            // Check cols.
+            if (c1 == col_by_position(p2)) {
+                for (size_t r2 = 0; r2 < board::ROW_SIZE; ++r2) {
+                    is_found = mark_pair_fn(p1, p2, to_position(r2, c1));
+                }
+            }
+            // Check grid.
+            if ((st_c1 == start_col_fn(p2)) && (st_r1 == start_row_fn(p2))) {
+                for (size_t r3 = st_r1; r3 < st_r1 + board::GRID_SIZE; ++r3) {
+                    for (size_t c3 = st_c1; c3 < st_c1 + board::GRID_SIZE; ++c3) {
+                        is_found = mark_pair_fn(p1, p2, to_position(r3, c3));
+                    }
+                }
+            }
+        }
+    }
+    return is_found;
 }
 
 bool solve_single_cell(board& b, const board::tag_t t)

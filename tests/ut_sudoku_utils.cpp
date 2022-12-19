@@ -37,6 +37,11 @@ bool is_set_value(const engine::board& b, const size_t r, const size_t c)
     return b.is_set_value(engine::details::to_position(r, c));
 }
 
+bool mark_naked_pairs(engine::board& b)
+{
+    return engine::details::mark_naked_pairs(b, engine::board::BEGIN_TAG);
+}
+
 std::string print(const engine::board::grid_t& board)
 {
     std::stringstream ss;
@@ -75,6 +80,77 @@ engine::board::value_t value(const engine::board& b, const size_t r, const size_
 }
 
 } // <anonymous> namespace
+
+TEST(sudoku_utils, col_by_position)
+{
+    for (size_t i = 0; i < 9; ++i) {
+        for (size_t j = 0; j < 9; ++j) {
+            const size_t pos = i * 9 + j;
+            EXPECTED(engine::details::col_by_position(pos) == j)
+                << "position " << pos << " not equal " << j << " col" << std::endl;
+        }
+    }
+}
+
+TEST(sudoku_utils, row_by_position)
+{
+    for (size_t i = 0; i < 9; ++i) {
+        for (size_t j = 0; j < 9; ++j) {
+            const size_t pos = i * 9 + j;
+            EXPECTED(engine::details::row_by_position(pos) == i)
+                << "position " << pos << " not equal " << i << " row" << std::endl;
+        }
+    }
+}
+
+TEST(sudoku_utils, mark_naked_pairs)
+{
+    using is_possible_fn_t = const std::function<bool(const engine::board&,size_t,size_t,engine::board::value_t)>;
+
+    const engine::board::grid_t td = {
+        {{4, 0, 0, 2, 7, 0, 6, 0, 0},
+         {7, 9, 8, 1, 5, 6, 2, 3, 4},
+         {0, 2, 0, 8, 4, 0, 0, 0, 7},
+         {2, 3, 7, 4, 6, 8, 9, 5, 1},
+         {8, 4, 9, 5, 3, 1, 7, 2, 6},
+         {5, 6, 1, 7, 9, 2, 8, 4, 3},
+         {0, 8, 2, 0, 1, 5, 4, 7, 9},
+         {0, 7, 0, 0, 2, 4, 3, 0, 0},
+         {0, 0, 4, 0, 8, 7, 0, 0, 2}}
+    };
+
+    const is_possible_fn_t is_possible_fn =
+        [](const engine::board& b, size_t r, size_t c, engine::board::value_t v) -> bool {
+            return b.is_possible(engine::details::to_position(r, c), v);
+        };
+
+    engine::board sb(td);
+    EXPECTED(is_possible_fn(sb, 0, 1, 1));
+    EXPECTED(is_possible_fn(sb, 0, 7, 1));
+    EXPECTED(is_possible_fn(sb, 2, 0, 1));
+    EXPECTED(is_possible_fn(sb, 2, 6, 1));
+    EXPECTED(is_possible_fn(sb, 2, 7, 1));
+    EXPECTED(is_possible_fn(sb, 7, 0, 1));
+    EXPECTED(is_possible_fn(sb, 7, 7, 1));
+    EXPECTED(is_possible_fn(sb, 8, 0, 1));
+    EXPECTED(is_possible_fn(sb, 8, 1, 1));
+    EXPECTED(is_possible_fn(sb, 8, 6, 1));
+    EXPECTED(is_possible_fn(sb, 8, 7, 1));
+
+    mark_naked_pairs(sb);
+
+    EXPECTED(is_possible_fn(sb, 0, 1, 1));
+    EXPECTED(is_possible_fn(sb, 0, 7, 1));
+    EXPECTED(is_possible_fn(sb, 2, 0, 1));
+    EXPECTED(is_possible_fn(sb, 2, 6, 1));
+    EXPECTED(is_possible_fn(sb, 2, 7, 1));
+    EXPECTED(is_possible_fn(sb, 7, 0, 1));
+    EXPECTED(is_possible_fn(sb, 7, 7, 1));
+    EXPECTED(! is_possible_fn(sb, 8, 0, 1));
+    EXPECTED(is_possible_fn(sb, 8, 1, 1));
+    EXPECTED(is_possible_fn(sb, 8, 6, 1));
+    EXPECTED(! is_possible_fn(sb, 8, 7, 1));
+}
 
 TEST(sudoku_utils, solve_single_cell)
 {
@@ -289,28 +365,6 @@ TEST(sudoku_utils, solve_single_value)
     EXPECTED(sb.grid() == etalon_step_4)
         << "Etalon: " << std::endl << print(etalon_step_4) << std::endl
         << "Test result: " << std::endl << print(sb.grid()) << std::endl;
-}
-
-TEST(sudoku_utils, row_by_position)
-{
-    for (size_t i = 0; i < 9; ++i) {
-        for (size_t j = 0; j < 9; ++j) {
-            const size_t pos = i * 9 + j;
-            EXPECTED(engine::details::row_by_position(pos) == i)
-                << "position " << pos << " not equal " << i << " row" << std::endl;
-        }
-    }
-}
-
-TEST(sudoku_utils, col_by_position)
-{
-    for (size_t i = 0; i < 9; ++i) {
-        for (size_t j = 0; j < 9; ++j) {
-            const size_t pos = i * 9 + j;
-            EXPECTED(engine::details::col_by_position(pos) == j)
-                << "position " << pos << " not equal " << j << " col" << std::endl;
-        }
-    }
 }
 
 int main()
