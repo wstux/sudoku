@@ -107,7 +107,8 @@ void board::init()
     for (size_t r = 0; r < ROW_SIZE; ++r) {
         for (size_t c = 0; c < COL_SIZE; ++c) {
             if (m_grid[r][c] != 0) {
-                set_impossible(r, c, m_grid[r][c], DEFAULT_TAG);
+                m_ch_grid[r][c] = DEFAULT_TAG;
+                mark(m_possible, r, c, m_grid[r][c], DEFAULT_TAG, is_valid_tag);
             }
         }
     }
@@ -116,11 +117,6 @@ void board::init()
 bool board::is_possible(const size_t p, const value_t v) const
 {
     return (m_ch_grid[to_row(p)][to_col(p)] != 0) && (m_possible[to_row(p)][to_col(p)][v - 1] == INVALID_TAG);
-}
-
-void board::mark_impossible(const size_t p, const value_t v, const tag_t t)
-{
-    mark(m_possible, to_row(p), to_col(p), v, t, is_valid_tag);
 }
 
 board::tag_t board::max_tag() const
@@ -174,10 +170,14 @@ void board::rollback_to_tag(const tag_t t)
     }
 }
 
-void board::set_impossible(const size_t r, const size_t c, value_t v, const tag_t t)
+bool board::set_impossible(const size_t p, value_t v, const tag_t t)
 {
-    m_ch_grid[r][c] = t;
-    mark(m_possible, r, c, v, t, is_valid_tag);
+    if (! is_possible(p, v)) {
+        return false;
+    }
+
+    m_possible[to_row(p)][to_col(p)][v - 1] = t;
+    return true;
 }
 
 bool board::set_value(const size_t p, const value_t v, const tag_t t)
@@ -197,7 +197,8 @@ bool board::set_value(const size_t p, const value_t v, const tag_t t)
     }
 
     m_grid[r][c] = v;
-    set_impossible(r, c, v, t);
+    m_ch_grid[r][c] = t;
+    mark(m_possible, r, c, v, t, is_valid_tag);
     return true;
 }
 
