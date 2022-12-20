@@ -127,6 +127,7 @@ public:
     public:
         using ptr = std::shared_ptr<itest_suite>;
 
+        virtual ~itest_suite() {}
         virtual void test_body() = 0;
     };
 
