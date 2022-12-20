@@ -195,8 +195,6 @@ size_t checker::calculate_solutions(board& b, const board::tag_t t, const size_t
         if (solutions_count >= limit) {
             rollback_to_tag(b, t);
             return solutions_count;
-        } else {
-            rollback_to_tag(b, single_tag);
         }
     }
 
@@ -287,14 +285,13 @@ bool checker::solve(board& b, const board::tag_t t)
 
 bool checker::solve_single(board& b, const board::tag_t t)
 {
-    if (solve_single_cell(b, t))          { return true; }
-    if (solve_single_value_col(b, t))     { return true; }
-    if (solve_single_value_row(b, t))     { return true; }
-    if (solve_single_value_section(b, t)) { return true; }
+    if (solve_single_easy(b, t))        { return true; }
+    if (solve_single_medium(b, t))      { return true; }
+    if (solve_single_hard(b, t))        { return true; }
     return false;
 }
 
-bool checker::solve_single_cell(board& b, const board::tag_t t)
+bool checker::solve_single_easy(board& b, const board::tag_t t)
 {
     if (details::solve_single_cell(b, t)) {
         add_easy_item(t);
@@ -303,26 +300,33 @@ bool checker::solve_single_cell(board& b, const board::tag_t t)
     return false;
 }
 
-bool checker::solve_single_value_col(board& b, const board::tag_t t)
+bool checker::solve_single_hard(board& b, const board::tag_t t)
+{
+    if (details::mark_naked_pairs(b, t)) {
+        add_hard_item(t);
+        return true;
+    }
+    if (details::mark_hidden_pairs_col(b, t)) {
+        add_hard_item(t);
+        return true;
+    }
+    if (details::mark_hidden_pairs_row(b, t)) {
+        add_hard_item(t);
+        return true;
+    }
+    return false;
+}
+
+bool checker::solve_single_medium(board& b, const board::tag_t t)
 {
     if (details::solve_single_value_col(b, t)) {
         add_medium_item(t);
         return true;
     }
-    return false;
-}
-
-bool checker::solve_single_value_row(board& b, const board::tag_t t)
-{
     if (details::solve_single_value_row(b, t)) {
         add_medium_item(t);
         return true;
     }
-    return false;
-}
-
-bool checker::solve_single_value_section(board& b, const board::tag_t t)
-{
     if (details::solve_single_value_section(b, t)) {
         add_medium_item(t);
         return true;

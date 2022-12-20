@@ -76,6 +76,11 @@ void shaffle_array(TArray& array)
     }
 }
 
+bool mark_hidden_pairs_col(board& b, const board::tag_t t);
+bool mark_hidden_pairs_row(board& b, const board::tag_t t);
+
+bool mark_naked_pairs(board& b, const board::tag_t t);
+
 bool solve_single_cell(board& b, const board::tag_t t);
 bool solve_single_value_col(board& b, const board::tag_t t);
 bool solve_single_value_row(board& b, const board::tag_t t);

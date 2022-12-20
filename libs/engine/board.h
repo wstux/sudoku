@@ -30,17 +30,18 @@ public:
 
     const grid_t& grid() const { return m_grid; }
 
+    bool is_available(const size_t p, const value_t v) const;
     bool is_possible(const size_t p, const value_t v) const;
 
     bool is_set_value(const size_t p) const { return (m_grid[to_row(p)][to_col(p)] != 0); }
-
-    void mark_impossible(const size_t p, const value_t v, const tag_t t);
 
     void reset(grid_t g);
 
     void rollback(const tag_t t);
 
     void rollback_to_tag(const tag_t t);
+
+    bool set_impossible(const size_t p, value_t v, const tag_t t);
 
     bool set_value(const size_t p, const value_t v, const tag_t t);
 
@@ -51,11 +52,7 @@ public:
 private:
     void init();
 
-    void mark_impossible(const size_t r, const size_t c, value_t v, const tag_t t);
-
     tag_t max_tag() const;
-
-    void set_impossible(const size_t r, const size_t c, value_t v, const tag_t t);
 
     static size_t to_col(const size_t p);
 

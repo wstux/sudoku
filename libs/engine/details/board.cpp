@@ -8,14 +8,21 @@
 namespace engine {
 namespace {
 
+using ch_row_t = std::array<board::tag_t, board::COL_SIZE>;
+using ch_grid_t = std::array<ch_row_t, board::ROW_SIZE>;
+using possible_value_t = std::array<board::tag_t, board::GRID_SIZE * board::GRID_SIZE>;
+using possible_row_t = std::array<possible_value_t, board::COL_SIZE>;
+using possible_grid_t = std::array<possible_row_t, board::ROW_SIZE>;
+
+using changed_fn_t = std::function<board::tag_t(size_t)>;
+using is_correct_tag_fn_t = std::function<bool(board::tag_t)>;
+
 struct changed_pos_t final
 {
     bool is_valid() const { return (pos != board::BOARD_SIZE);}
 
     size_t pos = board::BOARD_SIZE;
 };
-
-using changed_fn_t = std::function<board::tag_t(size_t)>;
 
 template<class TInputIterator, class TUnaryFn>
 inline void for_each_n(TInputIterator it, size_t n, TUnaryFn f)
@@ -47,6 +54,29 @@ changed_pos_t find_change(const changed_fn_t& ch_fn, const board::tag_t t)
 
 inline bool is_valid_tag(const board::tag_t t) { return t == board::INVALID_TAG; }
 
+void mark(possible_grid_t& possible_grid, const size_t r, const size_t c,
+          board::value_t v, const board::tag_t t, const is_correct_tag_fn_t& is_valid_fn)
+{
+    v -= 1;
+
+    // Set rows.
+    for (possible_row_t& row : possible_grid) {
+        set_if(row[c][v], t, is_valid_fn);
+    }
+    // Set columns.
+    for (possible_value_t& cell : possible_grid[r]) {
+        set_if(cell[v], t, is_valid_fn);
+    }
+    // Set grid.
+    const size_t start_col = details::grid_start_col(c);
+    const size_t start_row = details::grid_start_row(r);
+    for (size_t row = start_row; row < start_row + board::GRID_SIZE; ++row) {
+        for (size_t col = start_col; col < start_col + board::GRID_SIZE; ++col) {
+            set_if(possible_grid[row][col][v], t, is_valid_fn);
+        }
+    }
+}
+
 } // <anonymous> namespace
 
 board::board()
@@ -77,42 +107,23 @@ void board::init()
     for (size_t r = 0; r < ROW_SIZE; ++r) {
         for (size_t c = 0; c < COL_SIZE; ++c) {
             if (m_grid[r][c] != 0) {
-                set_impossible(r, c, m_grid[r][c], DEFAULT_TAG);
+                m_ch_grid[r][c] = DEFAULT_TAG;
+                mark(m_possible, r, c, m_grid[r][c], DEFAULT_TAG, is_valid_tag);
             }
         }
     }
 }
 
+bool board::is_available(const size_t p, const value_t v) const
+{
+    return (m_ch_grid[to_row(p)][to_col(p)] == INVALID_TAG) &&
+           (m_possible[to_row(p)][to_col(p)][v - 1] == INVALID_TAG);
+}
+
 bool board::is_possible(const size_t p, const value_t v) const
 {
-    return (m_ch_grid[to_row(p)][to_col(p)] != 0) && (m_possible[to_row(p)][to_col(p)][v - 1] == INVALID_TAG);
-}
-
-void board::mark_impossible(const size_t p, const value_t v, const tag_t t)
-{
-    mark_impossible(to_row(p), to_col(p), v, t);
-}
-
-void board::mark_impossible(const size_t r, const size_t c, value_t v, const tag_t t)
-{
-    v -= 1;
-
-    // Set columns.
-    for_each_n(m_possible.begin(), ROW_SIZE,
-               [c, v, t](poss_row_t& pos_r) { set_if(pos_r[c][v], t, is_valid_tag); });
-
-    // Set rows.
-    for_each_n(m_possible[r].begin(), COL_SIZE,
-               [v, t](poss_value_t& pos_cell) { set_if(pos_cell[v], t, is_valid_tag); });
-
-    // Set grid.
-    const size_t start_col = details::grid_start_col(c);
-    const size_t start_row = details::grid_start_row(r);
-    for (size_t row = start_row; row < start_row + GRID_SIZE; ++row) {
-        for (size_t col = start_col; col < start_col + GRID_SIZE; ++col) {
-            set_if(m_possible[row][col][v], t, is_valid_tag);
-        }
-    }
+    return (m_ch_grid[to_row(p)][to_col(p)] != 0) &&
+           (m_possible[to_row(p)][to_col(p)][v - 1] == INVALID_TAG);
 }
 
 board::tag_t board::max_tag() const
@@ -166,10 +177,14 @@ void board::rollback_to_tag(const tag_t t)
     }
 }
 
-void board::set_impossible(const size_t r, const size_t c, value_t v, const tag_t t)
+bool board::set_impossible(const size_t p, value_t v, const tag_t t)
 {
-    m_ch_grid[r][c] = t;
-    mark_impossible(r, c, v, t);
+    if (! is_possible(p, v)) {
+        return false;
+    }
+
+    m_possible[to_row(p)][to_col(p)][v - 1] = t;
+    return true;
 }
 
 bool board::set_value(const size_t p, const value_t v, const tag_t t)
@@ -179,10 +194,18 @@ bool board::set_value(const size_t p, const value_t v, const tag_t t)
 
     if (m_ch_grid[r][c] == 0) {
         return false;
+    } else if (m_ch_grid[r][c] != INVALID_TAG) {
+        const tag_t old_tag = m_ch_grid[r][c];
+        mark(m_possible, r, c, m_grid[r][c], INVALID_TAG,
+             [&old_tag](tag_t t) -> bool { return (t == old_tag); });
+
+        m_grid[r][c] = 0;
+        m_ch_grid[r][c] = INVALID_TAG;
     }
 
     m_grid[r][c] = v;
-    set_impossible(r, c, v, t);
+    m_ch_grid[r][c] = t;
+    mark(m_possible, r, c, v, t, is_valid_tag);
     return true;
 }
 
