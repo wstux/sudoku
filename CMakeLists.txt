@@ -15,7 +15,7 @@ project(${PROJECT_NAME}
 # Build check
 ################################################################################
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
     message(STATUS "[INFO ] Build for '${CMAKE_SYSTEM_NAME}' platform")
 else()
     message(FATAL_ERROR "[FATAL] Unsupported '${CMAKE_SYSTEM_NAME}' platform")
