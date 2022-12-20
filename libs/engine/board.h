@@ -30,6 +30,7 @@ public:
 
     const grid_t& grid() const { return m_grid; }
 
+    bool is_available(const size_t p, const value_t v) const;
     bool is_possible(const size_t p, const value_t v) const;
 
     bool is_set_value(const size_t p) const { return (m_grid[to_row(p)][to_col(p)] != 0); }

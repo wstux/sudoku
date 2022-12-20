@@ -114,9 +114,16 @@ void board::init()
     }
 }
 
+bool board::is_available(const size_t p, const value_t v) const
+{
+    return (m_ch_grid[to_row(p)][to_col(p)] == INVALID_TAG) &&
+           (m_possible[to_row(p)][to_col(p)][v - 1] == INVALID_TAG);
+}
+
 bool board::is_possible(const size_t p, const value_t v) const
 {
-    return (m_ch_grid[to_row(p)][to_col(p)] != 0) && (m_possible[to_row(p)][to_col(p)][v - 1] == INVALID_TAG);
+    return (m_ch_grid[to_row(p)][to_col(p)] != 0) &&
+           (m_possible[to_row(p)][to_col(p)][v - 1] == INVALID_TAG);
 }
 
 board::tag_t board::max_tag() const
