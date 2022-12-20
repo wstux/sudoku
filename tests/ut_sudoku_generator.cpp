@@ -91,6 +91,21 @@ TEST(sudoku_generator, medium)
         << "Generated grid:" << std::endl << print(gen_grid) << std::endl;
 }
 
+TEST(sudoku_generator, hard)
+{
+    engine::generator gen;
+
+    const engine::board::grid_t gen_grid = generate(gen, engine::generator::difficult::HARD);
+    EXPECTED(! engine::solver::is_solved(gen_grid))
+        << "Generated grid:" << std::endl << print(gen_grid) << std::endl;
+
+    EXPECTED(engine::solver::can_solve(gen_grid));
+
+    EXPECTED(gen.difficulty() == engine::generator::difficult::HARD)
+        << gen.difficulty_str() << std::endl
+        << "Generated grid:" << std::endl << print(gen_grid) << std::endl;
+}
+
 TEST(sudoku_generator, very_hard)
 {
     engine::generator gen;

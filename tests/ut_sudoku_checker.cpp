@@ -1,5 +1,4 @@
 #include <limits>
-#include <sstream>
 #include <string>
 
 #include "engine/board.h"
@@ -65,6 +64,28 @@ TEST(sudoku_checker, medium)
     EXPECTED(calc_solutions(checker, td) == 1)
         << "solutions_count: " << checker.solutions_count() << std::endl;
     EXPECTED(checker.difficulty() == engine::details::checker::difficult::MEDIUM)
+        << engine::details::checker::difficult_to_str(checker.difficulty()) << std::endl;
+}
+
+TEST(sudoku_checker, hard)
+{
+    const engine::board::grid_t td = {
+        {{0, 3, 0, 0, 0, 0, 0, 5, 6},
+         {0, 0, 8, 0, 3, 7, 0, 0, 0},
+         {0, 7, 0, 1, 0, 0, 3, 0, 0},
+         {2, 0, 0, 0, 0, 9, 0, 0, 0},
+         {3, 0, 0, 8, 5, 0, 2, 9, 0},
+         {6, 0, 0, 0, 0, 3, 0, 0, 0},
+         {0, 9, 0, 2, 0, 0, 5, 0, 0},
+         {0, 0, 1, 0, 9, 8, 0, 0, 0},
+         {0, 2, 0, 0, 0, 0, 0, 1, 9}}
+    };
+
+    engine::details::checker checker;
+
+    EXPECTED(calc_solutions(checker, td) == 1)
+        << "solutions_count: " << checker.solutions_count() << std::endl;
+    EXPECTED(checker.difficulty() == engine::details::checker::difficult::HARD)
         << engine::details::checker::difficult_to_str(checker.difficulty()) << std::endl;
 }
 

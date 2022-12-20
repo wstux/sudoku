@@ -72,10 +72,10 @@ private:
     bool solve(board& b, const board::tag_t t);
 
     bool solve_single(board& b, const board::tag_t t);
-    bool solve_single_cell(board& b, const board::tag_t t);
-    bool solve_single_value_col(board& b, const board::tag_t t);
-    bool solve_single_value_row(board& b, const board::tag_t t);
-    bool solve_single_value_section(board& b, const board::tag_t t);
+
+    bool solve_single_easy(board& b, const board::tag_t t);
+    bool solve_single_hard(board& b, const board::tag_t t);
+    bool solve_single_medium(board& b, const board::tag_t t);
 
 private:
     random_indices_t m_rand_board_idx;
