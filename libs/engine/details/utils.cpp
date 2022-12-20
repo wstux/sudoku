@@ -51,7 +51,7 @@ bool mark_hidden_pairs_col(board& b, const board::tag_t t)
                                                board::value_t v) -> bool {
         size_t count = 0;
         for (size_t r = 0; r < board::ROW_SIZE; ++r) {
-            if (b.is_possible(to_position(r, c), v)) {
+            if (b.is_available(to_position(r, c), v)) {
                 if (r1 == board::ROW_SIZE) {
                     r1 = r;
                 } else if (r2 == board::ROW_SIZE) {
@@ -88,12 +88,12 @@ bool mark_hidden_pairs_col(board& b, const board::tag_t t)
                     }
 
                     const size_t p1 = to_position(r1, c);
-                    if (b.is_possible(p1, v3)) {
+                    if (b.is_available(p1, v3)) {
                         b.set_impossible(p1, v3, t);
                         is_found = true;
                     }
                     const size_t p2 = to_position(r2, c);
-                    if (b.is_possible(p2, v3)) {
+                    if (b.is_available(p2, v3)) {
                         b.set_impossible(p2, v3, t);
                         is_found = true;
                     }
@@ -112,7 +112,7 @@ bool mark_hidden_pairs_row(board& b, const board::tag_t t)
                                                board::value_t v) -> bool {
         size_t count = 0;
         for (size_t c = 0; c < board::COL_SIZE; ++c) {
-            if (b.is_possible(to_position(r, c), v)) {
+            if (b.is_available(to_position(r, c), v)) {
                 if (c1 == board::COL_SIZE) {
                     c1 = c;
                 } else if (c2 == board::COL_SIZE) {
@@ -149,12 +149,12 @@ bool mark_hidden_pairs_row(board& b, const board::tag_t t)
                     }
 
                     const size_t p1 = to_position(r, c1);
-                    if (b.is_possible(p1, v3)) {
+                    if (b.is_available(p1, v3)) {
                         b.set_impossible(p1, v3, t);
                         is_found = true;
                     }
                     const size_t p2 = to_position(r, c2);
-                    if (b.is_possible(p2, v3)) {
+                    if (b.is_available(p2, v3)) {
                         b.set_impossible(p2, v3, t);
                         is_found = true;
                     }
@@ -174,7 +174,7 @@ bool mark_naked_pairs(board& b, const board::tag_t t)
     const std::function<bool(size_t,size_t)> are_same_fn =
         [&b](size_t p1, size_t p2) -> bool {
             for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
-                if (b.is_possible(p1, v) != b.is_possible(p2, v)) {
+                if (b.is_available(p1, v) != b.is_available(p2, v)) {
                     return false;
                 }
             }
@@ -183,7 +183,7 @@ bool mark_naked_pairs(board& b, const board::tag_t t)
     const has_two_possibles_fn_t has_two_possibles_fn = [&b](size_t p) -> bool {
         size_t count = 0;
         for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
-            if (b.is_possible(p, v)) {
+            if (b.is_available(p, v)) {
                 ++count;
             }
         }
@@ -195,7 +195,7 @@ bool mark_naked_pairs(board& b, const board::tag_t t)
 
         bool is_found = false;
         for (board::value_t v = board::BEGIN_VALUE; v < board::END_VALUE; ++v) {
-            if (b.is_possible(p1, v) && b.is_possible(p3, v)) {
+            if (b.is_available(p1, v) && b.is_available(p3, v)) {
                 is_found = b.set_impossible(p3, v, t);
             }
         }
